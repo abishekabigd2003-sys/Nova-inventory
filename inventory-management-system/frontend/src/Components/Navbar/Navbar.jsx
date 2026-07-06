@@ -1,0 +1,281 @@
+import { useState, useEffect, useRef, Fragment } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../hooks/useToast';
+import api from '../../api/api';
+import { io } from 'socket.io-client';
+import './Navbar.css';
+
+/** Build breadcrumb from current pathname */
+function useBreadcrumb() {
+  const { pathname } = useLocation();
+  const segments = pathname.split('/').filter(Boolean);
+
+  const labelMap = {
+    dashboard:     'Dashboard',
+    products:      'Products',
+    categories:    'Categories',
+    'stock-in':    'Stock In',
+    'stock-out':   'Stock Out',
+    reports:       'Reports',
+    profile:       'Profile',
+    approval:      'Approvals',
+    notifications: 'Notifications',
+    settings:      'Settings',
+  };
+
+  const crumbs = segments.map((seg) => ({
+    label: labelMap[seg] || seg.charAt(0).toUpperCase() + seg.slice(1),
+    seg,
+  }));
+
+  return crumbs;
+}
+
+export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  const [langOpen,     setLangOpen]     = useState(false);
+  const [profileOpen,  setProfileOpen]  = useState(false);
+  const [lang,         setLang]         = useState('EN');
+  const [notifCount,   setNotifCount]   = useState(0);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    const fetchNotifCount = async () => {
+      try {
+        const { data } = await api.get('/api/notifications');
+        const unread = Array.isArray(data) ? data.filter((n) => !n.read).length : 0;
+        setNotifCount(unread);
+      } catch {
+        // silently fail
+      }
+    };
+    fetchNotifCount();
+    
+    // Socket.io Real-Time Notifications
+    const socket = io('http://localhost:5001'); // Direct to admin-service
+
+    socket.on('NEW_EDIT_REQUEST', (data) => {
+      if (user?.role === 'Admin') {
+        showToast(data.message, 'info');
+        setNotifCount(prev => prev + 1);
+      }
+    });
+
+    socket.on('REQUEST_APPROVED', (data) => {
+      if (user?._id === data.recipientId) {
+        showToast(data.message, 'success');
+        setNotifCount(prev => prev + 1);
+      }
+    });
+
+    socket.on('REQUEST_REJECTED', (data) => {
+      if (user?._id === data.recipientId) {
+        showToast(data.message, 'error');
+        setNotifCount(prev => prev + 1);
+      }
+    });
+
+    return () => socket.disconnect();
+  }, [user, showToast]);
+
+  const langRef    = useRef(null);
+  const profileRef = useRef(null);
+
+  const breadcrumbs = useBreadcrumb();
+
+  /* Close dropdowns on outside click */
+  useEffect(() => {
+    function onDown(e) {
+      if (langRef.current    && !langRef.current.contains(e.target))    setLangOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, []);
+
+  /* Close on Escape */
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') { setLangOpen(false); setProfileOpen(false); }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  const LANGS = [
+    { code: 'EN', label: 'English' },
+    { code: 'FR', label: 'Français' },
+    { code: 'DE', label: 'Deutsch' },
+    { code: 'JA', label: '日本語' },
+  ];
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
+  return (
+    <header className="navbar glass" role="banner">
+      {/* ── Left ── */}
+      <div className="navbar-left">
+        <button
+          className="navbar-menu-btn"
+          onClick={onMenuClick}
+          aria-label="Open navigation menu"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M4 6h16M4 12h10M4 18h16" />
+          </svg>
+        </button>
+
+        <nav className="breadcrumb" aria-label="Breadcrumb">
+          {breadcrumbs.map((crumb, i) => (
+            <Fragment key={crumb.seg}>
+              {i > 0 && <span className="breadcrumb-sep" aria-hidden="true">/</span>}
+              <span className={`breadcrumb-item ${i === breadcrumbs.length - 1 ? 'is-current' : ''}`}>
+                {crumb.label}
+              </span>
+            </Fragment>
+          ))}
+        </nav>
+      </div>
+
+      {/* ── Search ── */}
+      <div className="navbar-search" role="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
+        <input
+          type="search"
+          placeholder="Search products, orders, suppliers…"
+          aria-label="Global search"
+        />
+        <kbd className="search-kbd" aria-label="Keyboard shortcut">⌘K</kbd>
+      </div>
+
+      {/* ── Right cluster ── */}
+      <div className="navbar-right">
+        {/* Notifications */}
+        <button className="icon-btn tooltip" data-tooltip="Notifications" aria-label={`${notifCount} notifications`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9zM13.73 21a2 2 0 01-3.46 0" />
+          </svg>
+          {notifCount > 0 && (
+            <span className="icon-dot" aria-hidden="true">{notifCount}</span>
+          )}
+        </button>
+
+        {/* Theme toggle */}
+        <button
+          className="icon-btn tooltip theme-toggle"
+          onClick={onThemeToggle}
+          data-tooltip={theme === 'light' ? 'Dark mode' : 'Light mode'}
+          aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        >
+          {theme === 'light' ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="5" />
+              <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" />
+            </svg>
+          )}
+        </button>
+
+        {/* Language selector */}
+        <div className="navbar-dropdown" ref={langRef}>
+          <button
+            className="lang-btn"
+            onClick={() => setLangOpen((o) => !o)}
+            aria-haspopup="listbox"
+            aria-expanded={langOpen}
+            aria-label={`Language: ${lang}`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{width:15, height:15}}>
+              <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+            </svg>
+            {lang}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className={`chev ${langOpen ? 'is-open' : ''}`}>
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+
+          {langOpen && (
+            <div className="dropdown-menu" role="listbox">
+              {LANGS.map((l) => (
+                <button
+                  key={l.code}
+                  className={`dropdown-item ${lang === l.code ? 'is-selected' : ''}`}
+                  role="option"
+                  aria-selected={lang === l.code}
+                  onClick={() => { setLang(l.code); setLangOpen(false); }}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="navbar-divider" aria-hidden="true" />
+
+        {/* Profile menu */}
+        <div className="navbar-dropdown" ref={profileRef}>
+          <button
+            className="profile-btn"
+            onClick={() => setProfileOpen((o) => !o)}
+            aria-haspopup="menu"
+            aria-expanded={profileOpen}
+            aria-label="User menu"
+          >
+            <span className="avatar" aria-hidden="true">
+              {user?.name?.[0]?.toUpperCase() || 'A'}
+              <span className="online-dot" aria-label="Online" />
+            </span>
+            <span className="profile-meta">
+              <span className="profile-name">{user?.name || 'Admin User'}</span>
+              <span className="profile-role">Inventory Manager</span>
+            </span>
+            <svg
+              className={`chev ${profileOpen ? 'is-open' : ''}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+
+          {profileOpen && (
+            <div className="dropdown-menu profile-menu" role="menu">
+              <div className="profile-menu-header">
+                <span className="avatar avatar-lg" aria-hidden="true">
+                  {user?.name?.[0]?.toUpperCase() || 'A'}
+                </span>
+                <div className="profile-menu-meta">
+                  <span className="profile-menu-name">{user?.name || 'Admin User'}</span>
+                  <span className="profile-menu-email">{user?.email || 'admin@novastock.com'}</span>
+                </div>
+              </div>
+              <div className="dropdown-sep" role="separator" />
+              <button className="dropdown-item is-danger" role="menuitem" onClick={handleLogout}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}

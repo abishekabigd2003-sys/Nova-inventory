@@ -1,0 +1,81 @@
+/* ==========================================================================
+   DASHBOARD LAYOUT SHELL
+   ========================================================================== */
+
+.layout-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-app);
+  position: relative;
+}
+
+/* Main area shifts based on sidebar width */
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: var(--sidebar-w);
+  transition: margin-left var(--dur-slow) var(--ease-out);
+}
+
+.layout-shell.sidebar-collapsed .layout-main {
+  margin-left: var(--sidebar-w-collapsed);
+}
+
+/* ── Content area ── */
+.layout-content {
+  flex: 1;
+  padding: var(--space-8) clamp(var(--space-5), 3vw, var(--space-10));
+  padding-top: calc(var(--navbar-h) + var(--space-8));
+  background: var(--bg-app);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Page entrance animation — applied per-route change */
+.layout-content > * {
+  animation: fadeUp var(--dur-base) var(--ease-out) both;
+}
+
+/* ── Mobile scrim (overlay behind open drawer) ── */
+.layout-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: calc(var(--z-sidebar) - 1);
+  animation: fadeIn var(--dur-base) var(--ease-out);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* Tablet: sidebar collapses automatically */
+@media (max-width: 1024px) {
+  .layout-main {
+    margin-left: var(--sidebar-w-collapsed) !important;
+  }
+}
+
+/* Mobile: sidebar slides off-screen as drawer */
+@media (max-width: 992px) {
+  .layout-main {
+    margin-left: 0 !important;
+  }
+
+  .layout-content {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-content {
+    padding-top: calc(var(--navbar-h) + var(--space-5));
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+}

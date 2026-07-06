@@ -1,0 +1,15 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm start --prefix api-gateway\" \"npm start --prefix admin-service\"",
+    "dev": "concurrently \"npm run dev --prefix api-gateway\" \"npm run dev --prefix admin-service\"",
+    "install:all": "npm install && npm install --prefix api-gateway && npm install --prefix admin-service"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

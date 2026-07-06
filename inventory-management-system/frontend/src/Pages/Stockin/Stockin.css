@@ -1,0 +1,98 @@
+/* Stockin styles have been migrated to the global index.css as part of the enterprise design system overhaul. 
+   See .form-card, .standard-form, .form-row classes in index.css */
+
+.full-width-row {
+  grid-template-columns: 1fr;
+}
+
+.product-selector-group {
+  margin-bottom: 24px;
+}
+
+.image-upload-group {
+  margin-bottom: 24px;
+}
+
+.image-upload-container {
+  width: 100%;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.image-upload-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  border: 2px dashed var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  background-color: var(--bg-color, #f8fafc);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.image-upload-dropzone:hover {
+  border-color: var(--primary-color, #4f46e5);
+  background-color: var(--primary-50, #eef2ff);
+}
+
+.upload-icon-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--primary-100, #e0e7ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.upload-icon {
+  color: var(--primary-color, #4f46e5);
+}
+
+.upload-title {
+  font-weight: 500;
+  color: var(--text-color, #1e293b);
+  margin-bottom: 4px;
+}
+
+.upload-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.image-preview-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  background-color: var(--surface-color, #ffffff);
+}
+
+.image-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.image-preview-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-name {
+  font-weight: 500;
+  color: var(--text-color, #1e293b);
+  word-break: break-all;
+  padding-right: 16px;
+}

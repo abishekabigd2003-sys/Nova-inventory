@@ -1,0 +1,11 @@
+.stock-low {
+  color: var(--danger-600);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dark-mode .stock-low {
+  color: var(--danger-500);
+}

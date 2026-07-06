@@ -1,0 +1,24 @@
+.usi-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(var(--color-primary-rgb), 0.07);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.usi-info-banner svg { flex-shrink: 0; color: var(--color-primary); margin-top: 2px; }
+
+.usi-count {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.text-tertiary { color: var(--text-tertiary); }
+
+.usi-loading { padding: 8px 0; }

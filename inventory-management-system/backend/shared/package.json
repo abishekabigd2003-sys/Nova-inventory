@@ -1,0 +1,14 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "Shared middleware and utilities for IMS microservices",
+  "main": "index.js",
+  "type": "module",
+  "exports": {
+    "./middleware/auth.middleware.js": "./middleware/auth.middleware.js",
+    "./middleware/error.middleware.js": "./middleware/error.middleware.js"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  }
+}

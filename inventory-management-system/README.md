@@ -1,185 +1,113 @@
-# 📦 Inventory Management System — Enterprise Microservices
+# Inventory Management System - MERN Microservices
 
-A production-ready **MERN Stack Inventory Management System** refactored into a clean **Enterprise Microservices Architecture**.
+A production-ready **MERN Stack Inventory Management System** built with a clean **Enterprise Microservices Architecture**.
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```
 inventory-management-system/
-│
-├── frontend/               → React + Vite (Port 5173)
-│
-├── backend/
-│   ├── api-gateway/        → Reverse proxy gateway (Port 5000)
-│   ├── auth-service/       → JWT Authentication (Port 5001)
-│   ├── product-service/    → Products & Categories (Port 5002)
-│   ├── inventory-service/  → Stock, Requests, Audit Logs (Port 5003)
-│   ├── supplier-service/   → Suppliers CRUD (Port 5004)
-│   ├── customer-service/   → Customers CRUD (Port 5005)
-│   ├── purchase-service/   → Purchase Orders CRUD (Port 5006)
-│   ├── sales-service/      → Sales CRUD (Port 5007)
-│   ├── shared/             → Shared middleware & utilities
-│   └── docker-compose.yml
-│
-└── start.ps1               → One-click startup script
+|-- frontend/               # React + Vite Application
+|-- backend/
+|   |-- api-gateway/        # Reverse proxy gateway (Port 5000)
+|   |-- admin-service/      # Admin Service (Port 5001)
+|   |-- user-service/       # User Service
+|   |-- shared/             # Shared middleware & utilities
+|-- docker-compose.yml      # Root docker-compose configuration
 ```
 
 ---
 
-## 🗄️ Databases (MongoDB — localhost:27017)
+## Quick Start
 
-| Service           | Database                  |
-|-------------------|---------------------------|
-| auth-service      | `inventory_auth_db`       |
-| product-service   | `inventory_product_db`    |
-| inventory-service | `inventory_inventory_db`  |
-| supplier-service  | `inventory_supplier_db`   |
-| customer-service  | `inventory_customer_db`   |
-| purchase-service  | `inventory_purchase_db`   |
-| sales-service     | `inventory_sales_db`      |
+### Prerequisites
+- Node.js (v18+)
+- Docker and Docker Compose
+- MongoDB (if running locally without Docker)
 
----
+### Option A: Docker (Recommended)
 
-## 🔐 Role-Based Access Control (RBAC)
+1. **Build the frontend:**
+   Before running the backend API Gateway (which serves the frontend in production), you need to build the frontend.
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   cd ..
+   ```
 
-| Role    | Permissions                                          |
-|---------|------------------------------------------------------|
-| Admin   | Full access (all routes including Approval, Reports) |
-| Manager | Products, Categories, Stock In/Out, Reports          |
-| Staff   | Stock In, Stock Out only                             |
+2. **Start the microservices:**
+   From the root of the project, run:
+   ```bash
+   docker-compose up -d --build
+   ```
 
----
+3. Open **http://localhost:5000** in your browser.
 
-## 🌐 API Routes (via Gateway on port 5000)
+### Option B: Local Development
 
-| Endpoint               | Service           | Methods                  |
-|------------------------|-------------------|--------------------------|
-| `/api/auth/register`   | auth-service      | POST                     |
-| `/api/auth/login`      | auth-service      | POST                     |
-| `/api/auth/me`         | auth-service      | GET (Protected)          |
-| `/api/products`        | product-service   | GET, POST, PUT, DELETE   |
-| `/api/categories`      | product-service   | GET, POST, PUT, DELETE   |
-| `/api/stock`           | inventory-service | GET, POST                |
-| `/api/requests`        | inventory-service | GET, POST, PUT           |
-| `/api/notifications`   | inventory-service | GET                      |
-| `/api/reports`         | inventory-service | GET                      |
-| `/api/suppliers`       | supplier-service  | GET, POST, PUT, DELETE   |
-| `/api/customers`       | customer-service  | GET, POST, PUT, DELETE   |
-| `/api/purchases`       | purchase-service  | GET, POST, PUT, DELETE   |
-| `/api/sales`           | sales-service     | GET, POST, PUT, DELETE   |
+**1. Start MongoDB** (Make sure MongoDB is running on localhost:27017)
 
----
+**2. Configure Environment Variables:**
+   Copy `.env.example` to `.env` in the `admin-service`, `user-service`, and `api-gateway` directories and update the variables (especially MongoDB URIs and JWT secrets).
 
-## 🚀 Quick Start
+**3. Start each microservice** in a separate terminal:
 
-### Option A: Docker (Recommended for Production)
-
-> **Requires**: Docker Desktop installed and running.
-
-```powershell
-# From the project root
-.\start.ps1
-```
-
-This script automatically detects whether you have Docker Compose V1 or V2 installed.
-
-Then start the frontend separately:
 ```bash
-cd inventory-management-system/frontend
+# Admin Service
+cd backend/admin-service
+npm install
+npm run dev
+
+# User Service
+cd backend/user-service
+npm install
+npm run dev
+
+# API Gateway (start last)
+cd backend/api-gateway
 npm install
 npm run dev
 ```
 
-### Option B: Manual (Development)
-
-**1. Start MongoDB** (via MongoDB Compass or mongod service)
-
-**2. Start each microservice** in a separate terminal:
-
+**4. Start Frontend:**
 ```bash
-# Auth Service
-cd backend/auth-service && npm install && npm run dev
-
-# Product Service
-cd backend/product-service && npm install && npm run dev
-
-# Inventory Service
-cd backend/inventory-service && npm install && npm run dev
-
-# API Gateway (start last)
-cd backend/api-gateway && npm install && npm run dev
+cd frontend
+npm install
+npm run dev
 ```
 
-**3. Start Frontend**
-```bash
-cd frontend && npm install && npm run dev
-```
-
-Open **http://localhost:5173** in your browser.
+Open **http://localhost:5173** in your browser for the development server with HMR.
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
-Each service has a `.env` file. Key variables:
+Each service has a `.env.example` file. Key variables:
 
 ```env
 PORT=5001
-MONGO_URI=mongodb://localhost:27017/inventory_auth_db
+MONGO_URI=mongodb://localhost:27017/ims_admin_db
 JWT_SECRET=your_jwt_secret_here
 ```
 
-> ⚠️ **Never commit `.env` files to version control.**
+> **Note:** Never commit `.env` files to version control. They are ignored in `.gitignore`.
 
 ---
 
-## 🔒 Security Features
-
-- **Helmet.js** — HTTP security headers on API Gateway
-- **Rate Limiting** — 100 requests per 15 min per IP
-- **CORS** — Restricted to `localhost:5173`
-- **JWT Authentication** — RS256, 30-day expiry with role payload
-- **Password Hashing** — bcryptjs with 10 salt rounds
-- **Centralized Error Handling** — No stack traces in production
-- **OTP Hidden by Default** — `select: false` on sensitive fields
-
----
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer     | Technology                        |
 |-----------|-----------------------------------|
-| Frontend  | React 19, Vite, Axios, React Router |
-| Gateway   | Express, http-proxy-middleware, Helmet, Rate-Limit |
+| Frontend  | React, Vite, Axios, React Router  |
+| Gateway   | Express, http-proxy-middleware    |
 | Services  | Node.js, Express, Mongoose        |
-| Database  | MongoDB 7 (separate DBs per service) |
-| Auth      | JWT (jsonwebtoken), bcryptjs      |
+| Database  | MongoDB                           |
 | Container | Docker, Docker Compose            |
 
 ---
 
-## 📁 Shared Module
+## License
 
-Located at `backend/shared/`, this package is consumed by all microservices via `"shared": "file:../shared"` in each service's `package.json`.
-
-Contains:
-- `middleware/auth.middleware.js` — `protect`, `admin`, `authorize()` guards
-- `middleware/error.middleware.js` — `errorHandler`, `notFound`
-
----
-
-## 🧑‍💻 Demo Credentials
-
-| Role  | Email                  | Password  |
-|-------|------------------------|-----------|
-| Admin | admin@inventory.com    | admin123  |
-
-> Create this user by seeding the database or registering manually (first registered user can be promoted to Admin via MongoDB Compass).
-
----
-
-## 📄 License
-
-MIT © Inventory Management System
+MIT License

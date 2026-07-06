@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: ims-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ims-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  admin-service:
+    build:
+      context: ./backend/admin-service
+      dockerfile: Dockerfile
+    container_name: ims-admin-service
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongodb:27017/ims_admin_db
+      - JWT_SECRET=your_jwt_secret_here
+      - NODE_ENV=production
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - ims-network
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: ims-api-gateway
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - ADMIN_SERVICE_URL=http://admin-service:5001
+      - FRONTEND_DIST_PATH=/app/frontend-dist
+    volumes:
+      - ./frontend/dist:/app/frontend-dist:ro
+    depends_on:
+      - admin-service
+    networks:
+      - ims-network
+
+volumes:
+  mongo_data:
+  uploads_data:
+
+networks:
+  ims-network:
+    driver: bridge

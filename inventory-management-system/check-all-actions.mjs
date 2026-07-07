@@ -17,7 +17,7 @@ const req = https.request(options, (res) => {
       const parsed = JSON.parse(data);
       if (parsed.workflow_runs) {
         parsed.workflow_runs.slice(0, 5).forEach(run => {
-          console.log(`ID: ${run.id} | Name: ${run.name} | Created At: ${run.created_at} | Status: ${run.status}`);
+          console.log(`ID: ${run.id} | Name: ${run.name} | Created At: ${run.created_at} | Status: ${run.status} | Conclusion: ${run.conclusion}`);
         });
       }
     }

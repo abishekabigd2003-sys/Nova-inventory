@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Frontend Dependencies
         working-directory: ./inventory-management-system/frontend
-        run: npm ci
+        run: npm install
 
       - name: Run Frontend Lint
         working-directory: ./inventory-management-system/frontend
@@ -51,7 +51,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./inventory-management-system/frontend
-        run: npm ci
+        run: npm install
 
       - name: Build Frontend
         working-directory: ./inventory-management-system/frontend
@@ -77,7 +77,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./inventory-management-system/backend/${{ matrix.service }}
-        run: npm ci
+        run: npm install
 
       - name: Check Syntax (Build)
         working-directory: ./inventory-management-system/backend/${{ matrix.service }}
@@ -100,7 +100,7 @@ jobs:
 
       - name: Install QA Dependencies
         working-directory: ./inventory-management-system/qa-tests
-        run: npm ci
+        run: npm install
 
       - name: Run QA Tests
         working-directory: ./inventory-management-system/qa-tests

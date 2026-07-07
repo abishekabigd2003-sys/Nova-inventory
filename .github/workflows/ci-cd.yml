@@ -114,6 +114,10 @@ jobs:
         working-directory: ./inventory-management-system/qa-tests
         run: npm ci
 
+      - name: Install Playwright Browsers
+        working-directory: ./inventory-management-system/qa-tests
+        run: npx playwright install --with-deps
+
       - name: Run QA Tests
         working-directory: ./inventory-management-system/qa-tests
         run: npm test

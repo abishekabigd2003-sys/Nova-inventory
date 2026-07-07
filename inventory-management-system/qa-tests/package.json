@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"No tests configured yet\" && exit 0"
+    "test": "playwright test"
   },
   "keywords": [],
   "author": "",

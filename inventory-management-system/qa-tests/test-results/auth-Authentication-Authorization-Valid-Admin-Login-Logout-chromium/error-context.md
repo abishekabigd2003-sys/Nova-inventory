@@ -12,59 +12,10 @@
 # Error details
 
 ```
-Test timeout of 30000ms exceeded.
-```
+Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/login
+Call log:
+  - navigating to "http://127.0.0.1:5173/login", waiting until "load"
 
-```
-Error: page.waitForURL: Test timeout of 30000ms exceeded.
-=========================== logs ===========================
-waiting for navigation to "**/dashboard*" until "load"
-============================================================
-```
-
-# Page snapshot
-
-```yaml
-- generic [ref=e4]:
-  - generic [ref=e5]:
-    - img "Inventory Management 1" [ref=e6]
-    - img "Inventory Management 2" [ref=e7]
-    - img "Inventory Management 3" [ref=e8]
-  - generic [ref=e10]:
-    - generic [ref=e11]:
-      - heading "Welcome back" [level=1] [ref=e12]
-      - paragraph [ref=e13]: Sign in to your account to continue
-    - alert [ref=e14]: Not allowed by CORS
-    - generic [ref=e15]:
-      - generic [ref=e16]:
-        - generic [ref=e17]: Email address
-        - textbox "Email address" [ref=e18]:
-          - /placeholder: you@company.com
-          - text: admin@inventory.com
-      - generic [ref=e19]:
-        - generic [ref=e21]: Password
-        - textbox "Password" [ref=e22]:
-          - /placeholder: ••••••••
-          - text: Admin@123!
-        - link "Forgot password?" [ref=e23] [cursor=pointer]:
-          - /url: "#forgot"
-      - button "Sign in" [ref=e24] [cursor=pointer]
-    - generic [ref=e26]: or continue with
-    - generic [ref=e27]:
-      - button "Google" [ref=e28] [cursor=pointer]:
-        - img [ref=e29]
-        - text: Google
-      - button "Apple" [ref=e34] [cursor=pointer]:
-        - img [ref=e35]
-        - text: Apple
-    - paragraph [ref=e37]:
-      - text: Don't have an account?
-      - button "Create one" [ref=e38] [cursor=pointer]
-    - paragraph [ref=e39]:
-      - text: "Demo:"
-      - strong [ref=e40]: admin@inventory.com
-      - text: /
-      - strong [ref=e41]: Admin@123!
 ```
 
 # Test source
@@ -75,13 +26,13 @@ waiting for navigation to "**/dashboard*" until "load"
   3  | test.describe('Authentication & Authorization', () => {
   4  |   
   5  |   test('Valid Admin Login & Logout', async ({ page }) => {
-  6  |     await page.goto('/login');
+> 6  |     await page.goto('/login');
+     |                ^ Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/login
   7  |     await page.fill('input[type="email"]', 'admin@inventory.com');
   8  |     await page.fill('input[type="password"]', 'Admin@123!');
   9  |     await page.click('button[type="submit"]');
   10 | 
-> 11 |     await page.waitForURL('**/dashboard*');
-     |                ^ Error: page.waitForURL: Test timeout of 30000ms exceeded.
+  11 |     await page.waitForURL('**/dashboard*');
   12 |     await expect(page).toHaveURL(/.*dashboard.*/);
   13 | 
   14 |     // Logout

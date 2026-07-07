@@ -33,7 +33,7 @@ export const seedAdmin = async () => {
       await User.create({
         name: 'Test User',
         email: testUserEmail,
-        password: 'password123',
+        password: 'Password@123!',
         role: 'Staff',
         isActive: true,
       });

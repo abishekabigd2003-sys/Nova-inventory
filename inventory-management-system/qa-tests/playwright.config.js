@@ -8,9 +8,9 @@ export default defineConfig({
   reporter: [['list'], ['github'], ['html']],
   use: {
     baseURL: 'http://localhost:5173',
-    trace: 'on',
-    video: 'on',
-    screenshot: 'on',
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
+    screenshot: 'only-on-failure',
     headless: true,
   },
   projects: [

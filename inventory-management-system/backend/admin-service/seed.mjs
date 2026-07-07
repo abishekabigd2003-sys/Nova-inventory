@@ -37,7 +37,7 @@ async function seed() {
       const adminUser = new User({
         name: 'Admin User',
         email: adminEmail,
-        password: 'admin123',
+        password: 'Admin@123!',
         role: 'Admin',
       });
       await adminUser.save();

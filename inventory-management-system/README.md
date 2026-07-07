@@ -88,7 +88,7 @@ Each service has a `.env.example` file. Key variables:
 
 ```env
 PORT=5001
-MONGO_URI=mongodb://localhost:27017/ims_admin_db
+MONGO_URI=<MongoDB Atlas Connection String>
 JWT_SECRET=your_jwt_secret_here
 ```
 

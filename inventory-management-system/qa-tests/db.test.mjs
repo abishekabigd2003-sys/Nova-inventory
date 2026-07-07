@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
-const MONGO_URI = 'mongodb://localhost:27017/ims_admin_db';
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) throw new Error("MONGO_URI environment variable is required.");
 
 async function runDBTest() {
   console.log('Connecting to database...');

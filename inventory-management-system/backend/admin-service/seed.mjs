@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const MONGO_URI = 'mongodb://localhost:27017/ims_admin_db';
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) throw new Error("MONGO_URI environment variable is required.");
 
 const UserSchema = new mongoose.Schema(
   {

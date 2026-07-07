@@ -28,7 +28,7 @@ services:
       - "5001:5001"
     environment:
       - PORT=5001
-      - MONGO_URI=mongodb://mongodb:27017/ims_admin_db
+      - MONGO_URI=${MONGO_URI}
       - JWT_SECRET=your_jwt_secret_here
       - NODE_ENV=production
     volumes:

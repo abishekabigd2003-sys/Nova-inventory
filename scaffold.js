@@ -20,7 +20,7 @@ const write = (p, content) => {
 
 const getEnv = (port, db) => `
 PORT=${port}
-MONGO_URI=mongodb://localhost:27017/${db}
+MONGO_URI=<MongoDB Atlas Connection String>
 JWT_SECRET=secret
 `;
 

@@ -120,9 +120,9 @@ jobs:
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
           JWT_SECRET: supersecrettestkey
-          ADMIN_SERVICE_URL: http://localhost:5001
-          API_GATEWAY_URL: http://localhost:5000
-          FRONTEND_URL: http://localhost:5173
+          ADMIN_SERVICE_URL: http://127.0.0.1:5001
+          API_GATEWAY_URL: http://127.0.0.1:5000
+          FRONTEND_URL: http://127.0.0.1:5173
         run: |
           npm start --prefix backend/admin-service &
           npm start --prefix backend/api-gateway &

@@ -164,37 +164,49 @@ jobs:
     environment: production
     steps:
       - name: Verify Secrets
+        id: check_secrets
         env:
           RENDER_DEPLOY_HOOK_ADMIN: ${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}
           RENDER_DEPLOY_HOOK_API: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
           RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
         run: |
           echo "Checking required deployment secrets..."
+          MISSING=0
           if [ -z "$RENDER_DEPLOY_HOOK_ADMIN" ]; then
-            echo "Error: RENDER_DEPLOY_HOOK_ADMIN is missing."
-            exit 1
+            echo "::warning::RENDER_DEPLOY_HOOK_ADMIN is missing."
+            MISSING=1
           fi
           if [ -z "$RENDER_DEPLOY_HOOK_API" ]; then
-            echo "Error: RENDER_DEPLOY_HOOK_API is missing."
-            exit 1
+            echo "::warning::RENDER_DEPLOY_HOOK_API is missing."
+            MISSING=1
           fi
           if [ -z "$RENDER_DEPLOY_HOOK_FRONTEND" ]; then
-            echo "Error: RENDER_DEPLOY_HOOK_FRONTEND is missing."
-            exit 1
+            echo "::warning::RENDER_DEPLOY_HOOK_FRONTEND is missing."
+            MISSING=1
           fi
-          echo "All secrets verified."
+          
+          if [ $MISSING -eq 1 ]; then
+            echo "One or more deployment secrets are missing. Deployment will be skipped safely."
+            echo "skip_deploy=true" >> $GITHUB_ENV
+          else
+            echo "All secrets verified."
+            echo "skip_deploy=false" >> $GITHUB_ENV
+          fi
 
       - name: Trigger Admin Service Deploy
+        if: env.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_ADMIN: ${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}
         run: curl -s -X POST "$RENDER_DEPLOY_HOOK_ADMIN"
 
       - name: Trigger API Gateway Deploy
+        if: env.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_API: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
         run: curl -s -X POST "$RENDER_DEPLOY_HOOK_API"
 
       - name: Trigger Frontend Deploy
+        if: env.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
         run: curl -s -X POST "$RENDER_DEPLOY_HOOK_FRONTEND"

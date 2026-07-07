@@ -46,8 +46,8 @@ app.use(compression());
 
 // ── CORS — allow frontend + gateway ──
 const allowedOrigins = isProd
-  ? ['http://localhost:5000']
-  : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5000'];
+  ? [process.env.API_GATEWAY_URL].filter(Boolean)
+  : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5000', process.env.API_GATEWAY_URL].filter(Boolean);
 
 app.use(
   cors({

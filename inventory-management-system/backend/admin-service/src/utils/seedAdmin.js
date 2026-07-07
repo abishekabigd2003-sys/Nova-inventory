@@ -6,7 +6,10 @@ dotenv.config();
 export const seedAdmin = async () => {
   try {
     if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ims_admin_db');
+      if (!process.env.MONGO_URI) {
+        throw new Error('MONGO_URI is not defined in environment variables.');
+      }
+      await mongoose.connect(process.env.MONGO_URI);
     }
     const adminEmail = 'admin@inventory.com';
     const existingAdmin = await User.findOne({ email: adminEmail });

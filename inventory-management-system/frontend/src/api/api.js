@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Single source of truth for axios configuration
 const api = axios.create({
-  baseURL: '',
+  baseURL: import.meta.env.VITE_API_URL || '',
   timeout: 10000,
 });
 

@@ -40,8 +40,8 @@ app.use(limiter);
 
 // ── CORS ──
 const allowedOrigins = isProd
-  ? ['http://localhost:5000']
-  : ['http://localhost:5173', 'http://localhost:5174'];
+  ? [process.env.FRONTEND_URL].filter(Boolean)
+  : ['http://localhost:5173', 'http://localhost:5174', process.env.FRONTEND_URL].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -56,7 +56,14 @@ app.use(cors({
 }));
 
 // ── Admin Service URL ──
-const ADMIN_URL = process.env.ADMIN_SERVICE_URL || 'http://localhost:5001';
+const ADMIN_URL = isProd 
+  ? process.env.ADMIN_SERVICE_URL 
+  : (process.env.ADMIN_SERVICE_URL || 'http://localhost:5001');
+
+if (isProd && !ADMIN_URL) {
+  console.error('FATAL: ADMIN_SERVICE_URL is not defined in environment variables');
+  process.exit(1);
+}
 
 // ── API Proxy Routes ──
 const apiRoutes = {

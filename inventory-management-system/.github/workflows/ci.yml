@@ -61,7 +61,6 @@ jobs:
         working-directory: qa-tests
         run: npm run test:ci
         env:
-          PORT: 5001
           MONGO_URI: mongodb://127.0.0.1:27017/ims_admin_db
           JWT_SECRET: super_secret_jwt_key_ims_ci
           NODE_ENV: development

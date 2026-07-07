@@ -56,8 +56,9 @@ export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
     fetchNotifCount();
     
     // Socket.io Real-Time Notifications
-    const socket = io('http://localhost:5001'); // Direct to admin-service
-
+    const socket = io(import.meta.env.VITE_API_URL || '', {
+      withCredentials: true
+    });
     socket.on('NEW_EDIT_REQUEST', (data) => {
       if (user?.role === 'Admin') {
         showToast(data.message, 'info');

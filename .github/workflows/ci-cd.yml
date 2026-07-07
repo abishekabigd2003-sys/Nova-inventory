@@ -172,18 +172,20 @@ jobs:
         run: |
           echo "Checking required deployment secrets..."
           MISSING=0
-          if [ -z "$RENDER_DEPLOY_HOOK_ADMIN" ]; then
-            echo "::warning::RENDER_DEPLOY_HOOK_ADMIN is missing."
-            MISSING=1
-          fi
-          if [ -z "$RENDER_DEPLOY_HOOK_API" ]; then
-            echo "::warning::RENDER_DEPLOY_HOOK_API is missing."
-            MISSING=1
-          fi
-          if [ -z "$RENDER_DEPLOY_HOOK_FRONTEND" ]; then
-            echo "::warning::RENDER_DEPLOY_HOOK_FRONTEND is missing."
-            MISSING=1
-          fi
+          
+          required_secrets=(
+            "RENDER_DEPLOY_HOOK_ADMIN"
+            "RENDER_DEPLOY_HOOK_API"
+            "RENDER_DEPLOY_HOOK_FRONTEND"
+          )
+          
+          for secret in "${required_secrets[@]}"; do
+            # Using bash indirect expansion to check the value of the environment variable named $secret
+            if [ -z "${!secret}" ]; then
+              echo "::warning::${secret} is missing."
+              MISSING=1
+            fi
+          done
           
           if [ $MISSING -eq 1 ]; then
             echo "One or more deployment secrets are missing. Deployment will be skipped safely."
@@ -197,16 +199,16 @@ jobs:
         if: steps.check_secrets.outputs.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_ADMIN: ${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}
-        run: curl -s -X POST "$RENDER_DEPLOY_HOOK_ADMIN"
+        run: curl -Ssf -X POST "$RENDER_DEPLOY_HOOK_ADMIN"
 
       - name: Trigger API Gateway Deploy
         if: steps.check_secrets.outputs.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_API: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
-        run: curl -s -X POST "$RENDER_DEPLOY_HOOK_API"
+        run: curl -Ssf -X POST "$RENDER_DEPLOY_HOOK_API"
 
       - name: Trigger Frontend Deploy
         if: steps.check_secrets.outputs.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
-        run: curl -s -X POST "$RENDER_DEPLOY_HOOK_FRONTEND"
+        run: curl -Ssf -X POST "$RENDER_DEPLOY_HOOK_FRONTEND"

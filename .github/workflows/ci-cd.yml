@@ -124,10 +124,16 @@ jobs:
           API_GATEWAY_URL: http://127.0.0.1:5000
           FRONTEND_URL: http://127.0.0.1:5173
         run: |
-          npm start --prefix backend/admin-service &
-          npm start --prefix backend/api-gateway &
-          npm run dev --prefix frontend &
-          npx wait-on -i 2000 -t 60000 http://127.0.0.1:5001/health http://127.0.0.1:5000/health http-get://127.0.0.1:5173
+          if [ -z "${MONGO_URI}" ]; then
+            echo "ERROR: MONGO_URI is not set! You must add the MONGO_URI secret to your GitHub repository."
+            exit 1
+          fi
+          npm start --prefix backend/admin-service > admin.log 2>&1 &
+          npx wait-on -i 1000 -t 30000 http://127.0.0.1:5001/health || { echo "Admin Service crashed! Logs:"; cat admin.log; exit 1; }
+          npm start --prefix backend/api-gateway > api.log 2>&1 &
+          npx wait-on -i 1000 -t 30000 http://127.0.0.1:5000/health || { echo "API Gateway crashed! Logs:"; cat api.log; exit 1; }
+          npm run dev --prefix frontend -- --host 127.0.0.1 > frontend.log 2>&1 &
+          npx wait-on -i 1000 -t 30000 http-get://127.0.0.1:5173 || { echo "Frontend crashed! Logs:"; cat frontend.log; exit 1; }
 
       - name: Install Playwright Browsers
         working-directory: ./inventory-management-system/qa-tests

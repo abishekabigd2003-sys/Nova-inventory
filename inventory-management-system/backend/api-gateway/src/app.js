@@ -18,10 +18,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const isProd = process.env.NODE_ENV === 'production';
 
-// ── Health Check (Bypass Rate Limiting) ──
-app.get('/health', (req, res) => res.status(200).json({ status: 'ok', service: 'api-gateway' }));
-app.head('/health', (req, res) => res.status(200).end());
-
 // ── Security Middleware ──
 app.use(helmet({
   contentSecurityPolicy: false, // Disable CSP to allow React inline scripts
@@ -38,6 +34,7 @@ app.use(compression());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Limit each IP to 1000 requests per windowMs
+  skip: (req) => req.path === '/health', // Do not rate limit health checks
   message: { message: 'Too many requests from this IP, please try again later.' }
 });
 app.use(limiter);
@@ -87,6 +84,7 @@ const apiRoutes = {
   '/api/purchases': ADMIN_URL,
   '/api/sales': ADMIN_URL,
   '/uploads': ADMIN_URL,
+  '/health': ADMIN_URL,
 };
 
 for (const [route, target] of Object.entries(apiRoutes)) {

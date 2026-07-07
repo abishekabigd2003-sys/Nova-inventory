@@ -127,7 +127,7 @@ jobs:
           npm start --prefix backend/admin-service &
           npm start --prefix backend/api-gateway &
           npm run dev --prefix frontend &
-          npx wait-on http://localhost:5001/health http://localhost:5000/health http-get://localhost:5173
+          npx wait-on -i 2000 -t 60000 http://127.0.0.1:5001/health http://127.0.0.1:5000/health http-get://127.0.0.1:5173
 
       - name: Install Playwright Browsers
         working-directory: ./inventory-management-system/qa-tests

@@ -18,6 +18,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const isProd = process.env.NODE_ENV === 'production';
 
+// ── Health Check (Bypass Rate Limiting) ──
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok', service: 'api-gateway' }));
+app.head('/health', (req, res) => res.status(200).end());
+
 // ── Security Middleware ──
 app.use(helmet({
   contentSecurityPolicy: false, // Disable CSP to allow React inline scripts
@@ -83,7 +87,6 @@ const apiRoutes = {
   '/api/purchases': ADMIN_URL,
   '/api/sales': ADMIN_URL,
   '/uploads': ADMIN_URL,
-  '/health': ADMIN_URL,
 };
 
 for (const [route, target] of Object.entries(apiRoutes)) {

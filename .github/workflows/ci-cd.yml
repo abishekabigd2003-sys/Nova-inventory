@@ -163,27 +163,37 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Verify Secrets
+        env:
+          RENDER_DEPLOY_HOOK_ADMIN: ${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}
+          RENDER_DEPLOY_HOOK_API: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
+          RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
         run: |
           echo "Checking required deployment secrets..."
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}" ]; then
+          if [ -z "$RENDER_DEPLOY_HOOK_ADMIN" ]; then
             echo "Error: RENDER_DEPLOY_HOOK_ADMIN is missing."
             exit 1
           fi
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_API }}" ]; then
+          if [ -z "$RENDER_DEPLOY_HOOK_API" ]; then
             echo "Error: RENDER_DEPLOY_HOOK_API is missing."
             exit 1
           fi
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}" ]; then
+          if [ -z "$RENDER_DEPLOY_HOOK_FRONTEND" ]; then
             echo "Error: RENDER_DEPLOY_HOOK_FRONTEND is missing."
             exit 1
           fi
           echo "All secrets verified."
 
       - name: Trigger Admin Service Deploy
-        run: curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}"
+        env:
+          RENDER_DEPLOY_HOOK_ADMIN: ${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}
+        run: curl -s -X POST "$RENDER_DEPLOY_HOOK_ADMIN"
 
       - name: Trigger API Gateway Deploy
-        run: curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_API }}"
+        env:
+          RENDER_DEPLOY_HOOK_API: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
+        run: curl -s -X POST "$RENDER_DEPLOY_HOOK_API"
 
       - name: Trigger Frontend Deploy
-        run: curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}"
+        env:
+          RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
+        run: curl -s -X POST "$RENDER_DEPLOY_HOOK_FRONTEND"

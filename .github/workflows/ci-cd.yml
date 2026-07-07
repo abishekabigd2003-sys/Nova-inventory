@@ -31,7 +31,7 @@ jobs:
 
       - name: Install Frontend Dependencies
         working-directory: ./inventory-management-system/frontend
-        run: npm ci
+        run: npm install
 
       - name: Run Frontend Lint
         working-directory: ./inventory-management-system/frontend
@@ -57,7 +57,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./inventory-management-system/frontend
-        run: npm ci
+        run: npm install
 
       - name: Build Frontend
         working-directory: ./inventory-management-system/frontend
@@ -86,7 +86,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./inventory-management-system/backend/${{ matrix.service }}
-        run: npm ci
+        run: npm install
 
       - name: Check Syntax (Build)
         working-directory: ./inventory-management-system/backend/${{ matrix.service }}
@@ -96,6 +96,11 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     needs: [frontend-build, backend-build]
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -107,12 +112,27 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'inventory-management-system/qa-tests/package-lock.json'
 
-      - name: Upgrade npm to v11 to match local lockfiles
-        run: npm install -g npm@11
+      - name: Install All Dependencies
+        working-directory: ./inventory-management-system
+        run: |
+          npm install --prefix backend/admin-service
+          npm install --prefix backend/api-gateway
+          npm install --prefix frontend
+          npm install --prefix qa-tests
 
-      - name: Install QA Dependencies
-        working-directory: ./inventory-management-system/qa-tests
-        run: npm ci
+      - name: Start Services in Background
+        working-directory: ./inventory-management-system
+        env:
+          MONGO_URI: mongodb://localhost:27017/inventory_management
+          JWT_SECRET: supersecrettestkey
+          ADMIN_SERVICE_URL: http://localhost:5001
+          API_GATEWAY_URL: http://localhost:5000
+          FRONTEND_URL: http://localhost:5173
+        run: |
+          npm start --prefix backend/admin-service &
+          npm start --prefix backend/api-gateway &
+          npm run dev --prefix frontend &
+          npx wait-on http://localhost:5001/health http://localhost:5000/health http-get://localhost:5173
 
       - name: Install Playwright Browsers
         working-directory: ./inventory-management-system/qa-tests
@@ -120,6 +140,8 @@ jobs:
 
       - name: Run QA Tests
         working-directory: ./inventory-management-system/qa-tests
+        env:
+          MONGO_URI: mongodb://localhost:27017/inventory_management
         run: npm test
 
   deploy:

@@ -187,26 +187,26 @@ jobs:
           
           if [ $MISSING -eq 1 ]; then
             echo "One or more deployment secrets are missing. Deployment will be skipped safely."
-            echo "skip_deploy=true" >> $GITHUB_ENV
+            echo "skip_deploy=true" >> $GITHUB_OUTPUT
           else
             echo "All secrets verified."
-            echo "skip_deploy=false" >> $GITHUB_ENV
+            echo "skip_deploy=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Trigger Admin Service Deploy
-        if: env.skip_deploy == 'false'
+        if: steps.check_secrets.outputs.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_ADMIN: ${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}
         run: curl -s -X POST "$RENDER_DEPLOY_HOOK_ADMIN"
 
       - name: Trigger API Gateway Deploy
-        if: env.skip_deploy == 'false'
+        if: steps.check_secrets.outputs.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_API: ${{ secrets.RENDER_DEPLOY_HOOK_API }}
         run: curl -s -X POST "$RENDER_DEPLOY_HOOK_API"
 
       - name: Trigger Frontend Deploy
-        if: env.skip_deploy == 'false'
+        if: steps.check_secrets.outputs.skip_deploy == 'false'
         env:
           RENDER_DEPLOY_HOOK_FRONTEND: ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}
         run: curl -s -X POST "$RENDER_DEPLOY_HOOK_FRONTEND"

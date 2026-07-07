@@ -19,6 +19,8 @@ services:
         value: production
       - key: API_GATEWAY_URL
         sync: false # Must be set in Render dashboard to match the API Gateway URL
+      - key: FRONTEND_URL
+        sync: false # Must be set in Render dashboard to match the Frontend URL
 
   # 2. API Gateway (Handles rate limiting, security headers, routing)
   - type: web

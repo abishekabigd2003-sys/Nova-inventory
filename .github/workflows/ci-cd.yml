@@ -26,9 +26,12 @@ jobs:
             inventory-management-system/backend/admin-service/package-lock.json
             inventory-management-system/backend/api-gateway/package-lock.json
 
+      - name: Upgrade npm to v11 to match local lockfiles
+        run: npm install -g npm@11
+
       - name: Install Frontend Dependencies
         working-directory: ./inventory-management-system/frontend
-        run: npm install
+        run: npm ci
 
       - name: Run Frontend Lint
         working-directory: ./inventory-management-system/frontend
@@ -49,9 +52,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'inventory-management-system/frontend/package-lock.json'
 
+      - name: Upgrade npm to v11 to match local lockfiles
+        run: npm install -g npm@11
+
       - name: Install Dependencies
         working-directory: ./inventory-management-system/frontend
-        run: npm install
+        run: npm ci
 
       - name: Build Frontend
         working-directory: ./inventory-management-system/frontend
@@ -75,9 +81,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'inventory-management-system/backend/${{ matrix.service }}/package-lock.json'
 
+      - name: Upgrade npm to v11 to match local lockfiles
+        run: npm install -g npm@11
+
       - name: Install Dependencies
         working-directory: ./inventory-management-system/backend/${{ matrix.service }}
-        run: npm install
+        run: npm ci
 
       - name: Check Syntax (Build)
         working-directory: ./inventory-management-system/backend/${{ matrix.service }}
@@ -98,9 +107,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'inventory-management-system/qa-tests/package-lock.json'
 
+      - name: Upgrade npm to v11 to match local lockfiles
+        run: npm install -g npm@11
+
       - name: Install QA Dependencies
         working-directory: ./inventory-management-system/qa-tests
-        run: npm install
+        run: npm ci
 
       - name: Run QA Tests
         working-directory: ./inventory-management-system/qa-tests

@@ -26,6 +26,19 @@ export const seedAdmin = async () => {
     } else {
       console.log('[admin-service] Default Admin already exists.');
     }
+
+    const testUserEmail = 'testuser2@inventory.com';
+    const existingTestUser = await User.findOne({ email: testUserEmail });
+    if (!existingTestUser) {
+      await User.create({
+        name: 'Test User',
+        email: testUserEmail,
+        password: 'password123',
+        role: 'Staff',
+        isActive: true,
+      });
+      console.log(`[admin-service] Test user seeded: ${testUserEmail}`);
+    }
   } catch (error) {
     console.error('[admin-service] Error seeding admin:', error);
   }

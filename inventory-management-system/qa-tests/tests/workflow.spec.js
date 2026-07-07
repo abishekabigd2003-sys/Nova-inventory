@@ -16,7 +16,7 @@ test.describe('E2E UI Testing', () => {
     // 1. Admin Login
     await page.goto('/login');
     await page.fill('input[type="email"]', 'admin@inventory.com');
-    await page.fill('input[type="password"]', 'admin123');
+    await page.fill('input[type="password"]', 'Admin@123!');
     await page.click('button[type="submit"]');
 
     // Wait for Dashboard to load

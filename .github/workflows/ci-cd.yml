@@ -144,6 +144,14 @@ jobs:
           MONGO_URI: mongodb://localhost:27017/inventory_management
         run: npm test
 
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: inventory-management-system/qa-tests/playwright-report/
+          retention-days: 1
+
   deploy:
     name: Validate Environment & Deploy to Render
     runs-on: ubuntu-latest

@@ -15,12 +15,12 @@ const viewports = [
 
 const authRoutes = [
   '/admin/dashboard',
-  '/admin/products',
-  '/admin/categories',
-  '/admin/stock-in',
-  '/admin/stock-out',
-  '/admin/reports',
-  '/admin/approval'
+  '/admin/dashboard/products',
+  '/admin/dashboard/categories',
+  '/admin/dashboard/stock-in',
+  '/admin/dashboard/stock-out',
+  '/admin/dashboard/reports',
+  '/admin/dashboard/approval'
 ];
 
 test.describe('Comprehensive Responsive Testing', () => {

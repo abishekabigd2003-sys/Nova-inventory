@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 export const protect = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.error(`[auth.middleware] Missing or invalid auth header on ${req.method} ${req.originalUrl}. Headers:`, JSON.stringify(req.headers));
     return res.status(401).json({ message: 'Not authorized, no token' });
   }
 

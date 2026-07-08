@@ -1,196 +1,316 @@
-import { useState } from 'react';
-import { useInventory } from '../../context/InventoryContext';
-import SearchableDropdown from '../../Components/SearchableDropdown/SearchableDropdown';
-import { validateEntityName, validatePositiveNumber } from '../../utils/validation';
-import '../Categories/Categories.css';
+import { useState, useEffect } from 'react';
+import { 
+  Plus, Search, Edit2, Trash2, X, Check, FileDown, MoreVertical, 
+  RefreshCw, AlertCircle, PackagePlus, Hash, User, Calendar 
+} from 'lucide-react';
+import { 
+  getStockInRecords, createStockInRecord, updateStockInRecord, deleteStockInRecord 
+} from '../../api/stockin.api';
 import './Stockin.css';
 
 const Stockin = () => {
-  const { recordStockIn } = useInventory();
-  
-  const [formData, setFormData] = useState({
-    quantity: '',
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [search, setSearch] = useState('');
+
+  // Form State
+  const initialFormState = {
+    poDate: new Date().toISOString().split('T')[0],
+    poNumber: '',
+    partyName: '',
+    yarnCount: '',
+    itemName: '',
     color: '',
-    bale: '',
-    weight: '',
-    supplier: '',
-    date: new Date().toISOString().split('T')[0],
-    notes: '',
-    itemType: ''
-  });
+    baleCount: '',
+    weight: ''
+  };
+  const [formData, setFormData] = useState(initialFormState);
+  
+  // Edit State
+  const [editingId, setEditingId] = useState(null);
+  const [editFormData, setEditFormData] = useState(null);
 
-  const [successMsg, setSuccessMsg] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.itemType) {
-      setErrorMsg('Item Type is required.');
-      setTimeout(() => setErrorMsg(''), 4000);
-      return;
-    }
-    
-    // Default quantity to Number of Bales or 1
-    const finalQuantity = formData.bale ? Number(formData.bale) : 1;
-    
-    if (formData.bale) {
-      const baleError = validatePositiveNumber(formData.bale, 'Number of Bales');
-      if (baleError) { setErrorMsg(baleError); setTimeout(() => setErrorMsg(''), 4000); return; }
-    }
-    
-    if (formData.weight) {
-      const weightError = validatePositiveNumber(formData.weight, 'Weight');
-      if (weightError) { setErrorMsg(weightError); setTimeout(() => setErrorMsg(''), 4000); return; }
-    }
-    
-    if (formData.supplier) {
-      const supplierError = validateEntityName(formData.supplier);
-      if (supplierError) { setErrorMsg("Please enter a valid supplier name"); setTimeout(() => setErrorMsg(''), 4000); return; }
-    }
-    
-    const finalData = { ...formData, quantity: finalQuantity };
-    
+  // Fetch Data
+  const fetchData = async () => {
     setLoading(true);
-    setErrorMsg('');
-    
     try {
-      await recordStockIn(null, finalQuantity, finalData);
-      
-      setSuccessMsg(`Successfully recorded stock in.`);
-      setFormData({
-        quantity: '',
-        color: '',
-        bale: '',
-        weight: '',
-        supplier: '',
-        date: new Date().toISOString().split('T')[0],
-        notes: '',
-        itemType: ''
-      });
-      
-      setTimeout(() => setSuccessMsg(''), 3000);
+      const data = await getStockInRecords({ search });
+      setRecords(data);
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to record stock in.');
-      setTimeout(() => setErrorMsg(''), 4000);
+      setError(err.response?.data?.message || 'Failed to fetch Stock In records');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, [search]);
+
+  const showSuccess = (msg) => {
+    setSuccess(msg);
+    setTimeout(() => setSuccess(null), 3000);
+  };
+
+  const showError = (msg) => {
+    setError(msg);
+    setTimeout(() => setError(null), 4000);
+  };
+
+  // Handlers
+  const handleFormChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleEditFormChange = (e) => {
+    setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitLoading(true);
+    try {
+      await createStockInRecord(formData);
+      showSuccess('Stock In record created successfully');
+      setFormData(initialFormState);
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to create record');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this record?')) return;
+    try {
+      await deleteStockInRecord(id);
+      showSuccess('Record deleted successfully');
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to delete record');
+    }
+  };
+
+  const startEdit = (record) => {
+    setEditingId(record._id);
+    setEditFormData({
+      poDate: record.poDate.split('T')[0],
+      poNumber: record.poNumber,
+      partyName: record.partyName,
+      yarnCount: record.yarnCount,
+      itemName: record.itemName,
+      color: record.color || '',
+      baleCount: record.baleCount,
+      weight: record.weight,
+      status: record.status
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditFormData(null);
+  };
+
+  const saveEdit = async (id) => {
+    try {
+      await updateStockInRecord(id, editFormData);
+      showSuccess('Record updated successfully');
+      setEditingId(null);
+      setEditFormData(null);
+      fetchData();
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to update record');
+    }
+  };
+
   return (
-    <div className="page-container">
+    <div className="stockin-container fade-in">
+      
+      {/* Header */}
       <div className="page-header">
-        <h1 className="page-title">Stock In</h1>
-        <p className="page-subtitle">Add new inventory to your system</p>
+        <div className="header-content">
+          <div className="header-icon"><PackagePlus size={28} /></div>
+          <div>
+            <h1 className="page-title">Stock In Workflow</h1>
+            <p className="page-subtitle">Record and manage incoming inventory</p>
+          </div>
+        </div>
       </div>
 
-      <div className="form-card">
-        {successMsg && <div className="alert-success fade-in">{successMsg}</div>}
-        {errorMsg && <div className="alert-error fade-in" style={{color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '12px', borderRadius: '4px', border: '1px solid var(--border-default)', marginBottom: '16px'}}>{errorMsg}</div>}
-        
-        <form className="standard-form" onSubmit={handleSubmit}>
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label>Item Type</label>
-              <SearchableDropdown
-                options={['Cotton', 'Polyester', 'Sliver', 'FS', 'Drash', 'Powder', 'Cotton Rags']}
-                value={formData.itemType}
-                onChange={(val) => setFormData({ ...formData, itemType: val })}
-                placeholder="Select item type..."
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="color">Color</label>
-              <input 
-                type="text" 
-                id="color" 
-                placeholder="e.g. Red, Blue" 
-                value={formData.color}
-                onChange={(e) => setFormData({...formData, color: e.target.value})}
-              />
-            </div>
+      {/* Alerts */}
+      {success && <div className="alert alert-success"><Check size={18} /> {success}</div>}
+      {error && <div className="alert alert-error"><AlertCircle size={18} /> {error}</div>}
+
+      <div className="stockin-grid">
+        {/* Left Pane: Form */}
+        <div className="stockin-form-pane">
+          <div className="pane-header">
+            <h3>New Entry</h3>
           </div>
           
-          <div className="form-row">
+          <form className="stockin-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="bale">Number of Bales</label>
-              <input 
-                type="number" 
-                id="bale" 
-                min="0"
-                placeholder="e.g. 10" 
-                value={formData.bale}
-                onChange={(e) => setFormData({...formData, bale: e.target.value})}
-              />
+              <label><Calendar size={14} /> PO Date</label>
+              <input type="date" name="poDate" value={formData.poDate} onChange={handleFormChange} required />
             </div>
+
             <div className="form-group">
-              <label htmlFor="weight">Weight (kg)</label>
-              <input 
-                type="number" 
-                id="weight" 
-                min="0"
-                step="0.01"
-                placeholder="e.g. 50.5" 
-                value={formData.weight}
-                onChange={(e) => setFormData({...formData, weight: e.target.value})}
-              />
+              <label><Hash size={14} /> PO Number</label>
+              <input type="text" name="poNumber" value={formData.poNumber} onChange={handleFormChange} placeholder="e.g. PO-1001" required />
             </div>
-          </div>
-          
-          <div className="form-row">
+
             <div className="form-group">
-              <label htmlFor="supplier">Supplier</label>
-              <input 
-                type="text" 
-                id="supplier" 
-                placeholder="Supplier name" 
-                value={formData.supplier}
-                onChange={(e) => setFormData({...formData, supplier: e.target.value})}
-              />
+              <label><User size={14} /> Party Name</label>
+              <input type="text" name="partyName" value={formData.partyName} onChange={handleFormChange} placeholder="Supplier / Vendor" required />
             </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Yarn Count</label>
+                <input type="text" name="yarnCount" value={formData.yarnCount} onChange={handleFormChange} placeholder="e.g. 40s" required />
+              </div>
+              <div className="form-group">
+                <label>Item Name</label>
+                <input type="text" name="itemName" value={formData.itemName} onChange={handleFormChange} placeholder="e.g. Cotton" required />
+              </div>
+            </div>
+
             <div className="form-group">
-              <label htmlFor="date">Date Received</label>
-              <input 
-                type="date" 
-                id="date" 
-                required 
-                value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-              />
+              <label>Colour (Optional)</label>
+              <input type="text" name="color" value={formData.color} onChange={handleFormChange} placeholder="e.g. White, Natural" />
             </div>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="notes">Remarks (Optional)</label>
-            <textarea 
-              id="notes" 
-              rows="3" 
-              placeholder="Additional details..."
-              value={formData.notes}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
-            ></textarea>
-          </div>
-          
-          <div className="form-actions">
-            <button 
-              type="button" 
-              className="btn btn-secondary"
-              onClick={() => {
-                setFormData({
-                  quantity: '', color: '', bale: '', weight: '', supplier: '', 
-                  date: new Date().toISOString().split('T')[0], notes: '', itemType: ''
-                });
-              }}
-            >
-              Clear
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>No. of Bales</label>
+                <input type="number" name="baleCount" min="1" value={formData.baleCount} onChange={handleFormChange} placeholder="10" required />
+              </div>
+              <div className="form-group">
+                <label>Weight (KG)</label>
+                <input type="number" step="0.01" min="0" name="weight" value={formData.weight} onChange={handleFormChange} placeholder="50.0" required />
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary w-100 submit-btn" disabled={submitLoading}>
+              {submitLoading ? <RefreshCw className="spin" size={18} /> : <Plus size={18} />}
+              {submitLoading ? 'Saving...' : 'Add Stock In'}
             </button>
-            <button type="submit" className="btn btn-primary btn-large" disabled={loading}>
-              {loading ? 'Recording...' : 'Record Stock In'}
-            </button>
+          </form>
+        </div>
+
+        {/* Right Pane: Table Log */}
+        <div className="stockin-table-pane">
+          <div className="table-pane-header">
+            <h3>Stock In Log</h3>
+            <div className="table-actions">
+              <div className="search-box">
+                <Search size={16} />
+                <input 
+                  type="text" 
+                  placeholder="Search PO, Party, Item..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <button className="btn btn-secondary btn-icon" onClick={fetchData} title="Refresh">
+                <RefreshCw size={16} />
+              </button>
+            </div>
           </div>
-        </form>
+
+          <div className="table-responsive">
+            {loading ? (
+              <div className="loading-state">
+                <RefreshCw className="spin" size={24} />
+                <p>Loading records...</p>
+              </div>
+            ) : records.length === 0 ? (
+              <div className="empty-state">
+                <FileDown size={48} />
+                <p>No Stock In records found</p>
+              </div>
+            ) : (
+              <table className="erp-table">
+                <thead>
+                  <tr>
+                    <th>PO Date</th>
+                    <th>PO Number</th>
+                    <th>Party Name</th>
+                    <th>Item Details</th>
+                    <th>Bales</th>
+                    <th>Weight</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {records.map(record => (
+                    <tr key={record._id}>
+                      {editingId === record._id ? (
+                        /* Inline Edit Mode */
+                        <>
+                          <td><input type="date" name="poDate" className="edit-input" value={editFormData.poDate} onChange={handleEditFormChange} /></td>
+                          <td><input type="text" name="poNumber" className="edit-input" value={editFormData.poNumber} onChange={handleEditFormChange} /></td>
+                          <td><input type="text" name="partyName" className="edit-input" value={editFormData.partyName} onChange={handleEditFormChange} /></td>
+                          <td>
+                            <input type="text" name="itemName" className="edit-input mb-1" placeholder="Item" value={editFormData.itemName} onChange={handleEditFormChange} />
+                            <input type="text" name="yarnCount" className="edit-input" placeholder="Count" value={editFormData.yarnCount} onChange={handleEditFormChange} />
+                          </td>
+                          <td><input type="number" name="baleCount" className="edit-input warning-bg" value={editFormData.baleCount} onChange={handleEditFormChange} /></td>
+                          <td><input type="number" name="weight" className="edit-input success-bg" value={editFormData.weight} onChange={handleEditFormChange} /></td>
+                          <td>
+                            <select name="status" className="edit-input" value={editFormData.status} onChange={handleEditFormChange}>
+                              <option value="Approved">Approved</option>
+                              <option value="Pending">Pending</option>
+                              <option value="Rejected">Rejected</option>
+                            </select>
+                          </td>
+                          <td className="actions-cell">
+                            <button className="btn-icon text-success" onClick={() => saveEdit(record._id)} title="Save"><Check size={18} /></button>
+                            <button className="btn-icon text-danger" onClick={cancelEdit} title="Cancel"><X size={18} /></button>
+                          </td>
+                        </>
+                      ) : (
+                        /* View Mode */
+                        <>
+                          <td>{new Date(record.poDate).toLocaleDateString()}</td>
+                          <td className="font-medium">{record.poNumber}</td>
+                          <td>{record.partyName}</td>
+                          <td>
+                            <div className="item-details">
+                              <span className="item-name">{record.itemName}</span>
+                              <span className="item-meta">{record.yarnCount} {record.color && `• ${record.color}`}</span>
+                            </div>
+                          </td>
+                          <td><span className="badge badge-warning">{record.baleCount}</span></td>
+                          <td><span className="badge badge-success">{record.weight} KG</span></td>
+                          <td>
+                            <span className={`status-badge status-${record.status.toLowerCase()}`}>
+                              {record.status}
+                            </span>
+                          </td>
+                          <td className="actions-cell">
+                            <div className="dropdown">
+                              <button className="btn-icon"><MoreVertical size={18} /></button>
+                              <div className="dropdown-menu">
+                                <button onClick={() => startEdit(record)}><Edit2 size={14} /> Edit</button>
+                                <button className="text-danger" onClick={() => handleDelete(record._id)}><Trash2 size={14} /> Delete</button>
+                              </div>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

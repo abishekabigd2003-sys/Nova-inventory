@@ -14,7 +14,11 @@ api.interceptors.request.use(
       try {
         const { token } = JSON.parse(stored);
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          if (config.headers && config.headers.set) {
+            config.headers.set('Authorization', `Bearer ${token}`);
+          } else {
+            config.headers['Authorization'] = `Bearer ${token}`;
+          }
         }
       } catch {
         localStorage.removeItem('ims_user');

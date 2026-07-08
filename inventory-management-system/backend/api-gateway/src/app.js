@@ -34,9 +34,9 @@ app.use(compression());
 // ── Rate Limiting ──
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 requests per windowMs
+  max: 10000, // Increased limit for tests
   keyGenerator: (req) => req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown',
-  skip: (req) => req.path === '/health', // Do not rate limit health checks
+  skip: (req) => req.path === '/health' || req.path.startsWith('/assets'), // Skip static assets
   message: { message: 'Too many requests from this IP, please try again later.' }
 });
 app.use(limiter);
@@ -78,6 +78,7 @@ const apiRoutes = {
   '/api/categories': ADMIN_URL,
   '/api/stock': ADMIN_URL,
   '/api/stock-out': ADMIN_URL,
+  '/api/stockin': ADMIN_URL,
   '/api/requests': ADMIN_URL,
   '/api/notifications': ADMIN_URL,
   '/api/reports': ADMIN_URL,

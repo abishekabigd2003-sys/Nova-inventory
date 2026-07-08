@@ -25,6 +25,7 @@ import supplierRoutes from './routes/suppliers.routes.js';
 import customerRoutes from './routes/customers.routes.js';
 import purchaseRoutes from './routes/purchases.routes.js';
 import saleRoutes from './routes/sales.routes.js';
+import stockInRoutes from './routes/stockin.routes.js';
 
 // Middleware
 import { errorHandler, notFound } from './middleware/error.middleware.js';
@@ -93,6 +94,7 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/sales', saleRoutes);
+app.use('/api/stockin', stockInRoutes);
 
 // Error handling (must be last)
 app.use(notFound);

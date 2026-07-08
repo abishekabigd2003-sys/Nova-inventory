@@ -16,6 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1);
 const isProd = process.env.NODE_ENV === 'production';
 
 // ── Security Middleware ──
@@ -34,6 +35,7 @@ app.use(compression());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Limit each IP to 1000 requests per windowMs
+  keyGenerator: (req) => req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown',
   skip: (req) => req.path === '/health', // Do not rate limit health checks
   message: { message: 'Too many requests from this IP, please try again later.' }
 });
@@ -42,7 +44,7 @@ app.use(limiter);
 // ── CORS ──
 const allowedOrigins = isProd
   ? [process.env.FRONTEND_URL].filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', process.env.FRONTEND_URL].filter(Boolean);
+  : ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'http://localhost:5000', 'http://127.0.0.1:5000', process.env.FRONTEND_URL].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {

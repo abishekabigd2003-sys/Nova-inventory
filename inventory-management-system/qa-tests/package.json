@@ -10,7 +10,7 @@
     "start:backend": "npm start --prefix ../backend",
     "start:frontend": "npm run dev --prefix ../frontend",
     "wait-and-test": "wait-on tcp:5001 tcp:5000 tcp:5173 && npm run seed && playwright test",
-    "seed": "node ../backend/admin-service/seed.mjs"
+    "seed": "cd ../backend/admin-service && node seed.mjs"
   },
   "keywords": [],
   "author": "",
@@ -22,5 +22,8 @@
     "cross-env": "^10.1.0",
     "mongoose": "^9.7.3",
     "wait-on": "^9.0.10"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }

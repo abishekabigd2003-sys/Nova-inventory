@@ -46,21 +46,9 @@ app.use(morgan(isProd ? 'combined' : 'dev'));
 app.use(compression());
 
 // ── CORS — allow frontend + gateway ──
-const allowedOrigins = isProd
-  ? [process.env.API_GATEWAY_URL, process.env.FRONTEND_URL].filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'http://localhost:5000', 'http://127.0.0.1:5000', process.env.API_GATEWAY_URL, process.env.FRONTEND_URL].filter(Boolean);
-
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (server-to-server, curl, etc.)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn(`[CORS] Blocked request from origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: true,
     credentials: true,
   })
 );

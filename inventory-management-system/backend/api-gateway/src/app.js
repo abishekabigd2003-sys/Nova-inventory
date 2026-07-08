@@ -108,27 +108,39 @@ const distPath = process.env.FRONTEND_DIST_PATH
   ? path.resolve(__dirname, process.env.FRONTEND_DIST_PATH)
   : path.resolve(__dirname, '../../../frontend/dist');
 
-if (fs.existsSync(distPath)) {
-  console.log(`[api-gateway] Serving frontend from: ${distPath}`);
+// Serve static assets with cache headers
+app.use(express.static(distPath, {
+  maxAge: isProd ? '1y' : 0,
+  etag: true,
+  index: false, // Don't auto-serve index.html — we handle SPA fallback below
+}));
 
-  // Serve static assets with cache headers
-  app.use(express.static(distPath, {
-    maxAge: isProd ? '1y' : 0,
-    etag: true,
-    index: false, // Don't auto-serve index.html — we handle SPA fallback below
-  }));
+// SPA Fallback — serve index.html for any non-API route
+app.get('*', (req, res) => {
+  const indexPath = path.join(distPath, 'index.html');
+  
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    // If the frontend has not been built yet, return a friendly JSON response
+    // rather than falling through to 'Cannot GET /route'
+    res.status(503).json({
+      error: 'Service Unavailable',
+      message: 'API Gateway running. Frontend is not built or dist directory is missing.',
+      hint: 'Run "cd frontend && npm run build".'
+    });
+  }
+});
 
-  // SPA Fallback — serve index.html for any non-API route
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
+// ── Global Error Handler ──
+// Catch any errors (like res.sendFile failures) to prevent app crashes and raw stack traces
+app.use((err, req, res, next) => {
+  console.error(`[api-gateway] Error processing ${req.method} ${req.originalUrl}:`, err.message);
+  if (res.headersSent) return next(err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: isProd ? 'An unexpected error occurred in the API Gateway.' : err.message
   });
-} else {
-  console.warn(`[api-gateway] Frontend dist not found at: ${distPath}`);
-  console.warn('[api-gateway] Run "npm run build" in the frontend directory first.');
-  app.get('/', (req, res) => res.json({
-    message: 'API Gateway running. Frontend not built yet.',
-    hint: 'Run "cd frontend && npm run build" then restart the gateway.'
-  }));
-}
+});
 
 export default app;

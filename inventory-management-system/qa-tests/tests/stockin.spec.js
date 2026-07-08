@@ -35,10 +35,8 @@ test.describe('Stock In Workflow', () => {
     await expect(page.locator('input[name="poNumber"]')).toBeVisible();
     await expect(page.locator('input[name="partyName"]')).toBeVisible();
     
-    // Table Pane - either empty state or table
-    const tableVisible = await page.locator('.erp-table').isVisible();
-    const emptyVisible = await page.locator('.empty-state').isVisible();
-    expect(tableVisible || emptyVisible).toBeTruthy();
+    // Table Pane - wait for either empty state or table to render (bypassing loading spinner)
+    await expect(page.locator('.erp-table, .empty-state').first()).toBeVisible();
     
     await expect(page.locator('.search-box')).toBeVisible();
     

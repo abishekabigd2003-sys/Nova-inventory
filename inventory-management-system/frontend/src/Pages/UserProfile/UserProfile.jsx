@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../hooks/useToast';
-import { validatePersonName, validateEmail, validatePassword } from '../../utils/validation';
+import { validatePersonName, validatePassword } from '../../utils/validation';
 import './UserProfile.css';
 
 export default function UserProfile() {

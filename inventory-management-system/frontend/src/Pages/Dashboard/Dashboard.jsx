@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell
+  PieChart, Pie, Cell
 } from 'recharts';
 import api from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
@@ -30,7 +30,7 @@ const StatCard = ({ title, value, subtitle, icon, path, highlightColor = 'primar
 );
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const navigate = useNavigate();
   const { showToast, ToastContainer } = useToast();
 
@@ -44,7 +44,7 @@ export default function Dashboard() {
       const res = await api.get('/api/dashboard');
       setData(res.data);
       setError(null);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load dashboard data. Please try again.');
       showToast('Error loading dashboard data', 'error');
     } finally {

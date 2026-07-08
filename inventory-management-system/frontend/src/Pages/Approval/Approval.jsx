@@ -17,7 +17,7 @@ export default function Approval() {
     try {
       const { data } = await api.get('/api/requests');
       setRequests(data);
-    } catch (err) {
+    } catch (_err) {
       showToast('Failed to load edit requests', 'error');
     } finally {
       setLoading(false);

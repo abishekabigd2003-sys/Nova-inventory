@@ -3,7 +3,7 @@ import { useInventory } from '../../context/InventoryContext';
 import {
   Search, Plus, Eye, Edit2, Trash2, ArrowUp, ArrowDown,
   ArrowUpDown, ChevronLeft, ChevronRight, Package, X,
-  FileSpreadsheet, Download, RefreshCw, AlertTriangle
+  FileSpreadsheet, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { exportToExcel } from '../../utils/excelExport';
 import { validateEntityName, validatePositiveNumber } from '../../utils/validation';

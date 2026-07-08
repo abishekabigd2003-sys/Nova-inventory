@@ -39,7 +39,7 @@ export const InventoryProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [fetchCategories, fetchProducts]);
 
   const addCategory = async (category) => {
     await api.post('/api/categories', category);

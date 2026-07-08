@@ -275,16 +275,19 @@
 }
 
 @media (max-width: 768px) {
-  .signin-page { height: auto; min-height: 100vh; overflow-y: auto; padding: 0; }
-  .signin-card { flex-direction: column; height: auto; min-height: 100vh; max-height: none; border-radius: 0; box-shadow: none; }
-  .signin-image { width: 100%; height: 220px; }
-  .signin-form-panel { width: 100%; justify-content: flex-start; }
-  .signin-form-inner { max-width: 100%; padding: 36px 28px 48px; }
+  .signin-page { height: auto; min-height: 100vh; overflow-y: auto; overflow-x: hidden; padding: 0; width: 100%; max-width: 100vw; }
+  .signin-card { flex-direction: column; height: auto; min-height: 100vh; max-height: none; border-radius: 0; box-shadow: none; width: 100%; max-width: 100vw; overflow-x: hidden; }
+  .signin-image { width: 100%; height: 260px; flex-shrink: 0; }
+  .signin-form-panel { width: 100%; justify-content: flex-start; flex: 1; }
+  .signin-form-inner { max-width: 100%; width: 100%; padding: 32px 24px 48px; margin: 0 auto; }
 }
 
 @media (max-width: 480px) {
-  .signin-image { height: 180px; }
-  .signin-form-inner { padding: 28px 20px 40px; }
-  .signin-header h1 { font-size: 26px; }
-  .social-row { grid-template-columns: 1fr; }
+  .signin-image { height: 200px; }
+  .signin-form-inner { padding: 24px 16px 40px; }
+  .signin-header h1 { font-size: 24px; }
+  .signin-header p { font-size: 13.5px; }
+  .social-row { grid-template-columns: 1fr; gap: 8px; }
+  .signin-form input { font-size: 14px; padding: 12px; }
+  .btn.btn-primary, .signin-btn { height: 44px; font-size: 14.5px; }
 }

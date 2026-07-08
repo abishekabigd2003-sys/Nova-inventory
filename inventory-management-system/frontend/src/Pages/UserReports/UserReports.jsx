@@ -47,18 +47,31 @@ export default function UserReports() {
   const filtered = data.filter((item) => {
     if (!search) return true;
     const q = search.toLowerCase();
+    
+    // Stock-in (StockIn schema)
+    if (activeTab === 'stock-in') {
+      return (
+        item.poNumber?.toLowerCase().includes(q) ||
+        item.partyName?.toLowerCase().includes(q) ||
+        item.itemName?.toLowerCase().includes(q) ||
+        item.yarnCount?.toLowerCase().includes(q) ||
+        item.color?.toLowerCase().includes(q)
+      );
+    }
+    
+    // Stock-out (Stock schema)
     return (
       item.productId?.name?.toLowerCase().includes(q) ||
       item.productId?.sku?.toLowerCase().includes(q)  ||
       item.color?.toLowerCase().includes(q)            ||
-      item.supplier?.toLowerCase().includes(q)         ||
+      item.customerName?.toLowerCase().includes(q)     ||
       item.destination?.toLowerCase().includes(q)
     );
   });
 
 
 
-  const totalQty = filtered.reduce((s, r) => s + (r.quantity || 0), 0);
+  const totalQty = filtered.reduce((s, r) => s + (r.quantity || r.baleCount || 0), 0);
 
   return (
     <div className="page-container">
@@ -152,33 +165,72 @@ export default function UserReports() {
             <p style={{ padding: 24, color: 'var(--color-danger)' }}>{error}</p>
           ) : (
             <table className="enterprise-table" id="report-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Item Type</th>
-                  <th>SKU</th>
-                  <th>Qty</th>
-                  <th>Colour</th>
-                  <th>Bale</th>
-                  <th>Weight (kg)</th>
-                  <th>{activeTab === 'stock-in' ? 'Supplier' : 'Destination'}</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
+              {activeTab === 'stock-in' ? (
+                <>
+                  <thead>
+                    <tr>
+                      <th>PO Date</th>
+                      <th>PO Number</th>
+                      <th>Party Name</th>
+                      <th>Item Details</th>
+                      <th>Colour</th>
+                      <th>Bales</th>
+                      <th>Weight (kg)</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((s) => (
+                      <tr key={s._id}>
+                        <td className="text-tertiary">{new Date(s.poDate).toLocaleDateString()}</td>
+                        <td className="cell-strong">{s.poNumber || '—'}</td>
+                        <td>{s.partyName || '—'}</td>
+                        <td>{s.itemName} {s.yarnCount ? `(${s.yarnCount})` : ''}</td>
+                        <td>{s.color || '—'}</td>
+                        <td>{s.baleCount || '—'}</td>
+                        <td>{s.weight || '—'}</td>
+                        <td>
+                          <span className={`badge ${s.status === 'Approved' ? 'badge-success' : 'badge-neutral'}`}>
+                            {s.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </>
+              ) : (
+                <>
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Item Type</th>
+                      <th>SKU</th>
+                      <th>Qty</th>
+                      <th>Colour</th>
+                      <th>Bale</th>
+                      <th>Weight (kg)</th>
+                      <th>Customer/Destination</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((s) => (
+                      <tr key={s._id}>
+                        <td className="cell-strong">{s.productId?.name || '—'}</td>
+                        <td>{s.itemType || '—'}</td>
+                        <td className="text-tertiary">{s.productId?.sku || '—'}</td>
+                        <td>{s.quantity}</td>
+                        <td>{s.color || '—'}</td>
+                        <td>{s.bale || '—'}</td>
+                        <td>{s.weight || '—'}</td>
+                        <td>{s.customerName || s.destination || '—'}</td>
+                        <td className="text-tertiary">{new Date(s.date).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </>
+              )}
               <tbody>
-                {filtered.map((s) => (
-                  <tr key={s._id}>
-                    <td className="cell-strong">{s.productId?.name || '—'}</td>
-                    <td>{s.itemType || '—'}</td>
-                    <td className="text-tertiary">{s.productId?.sku || '—'}</td>
-                    <td>{s.quantity}</td>
-                    <td>{s.color || '—'}</td>
-                    <td>{s.bale || '—'}</td>
-                    <td>{s.weight || '—'}</td>
-                    <td>{activeTab === 'stock-in' ? (s.supplier || '—') : (s.destination || '—')}</td>
-                    <td className="text-tertiary">{new Date(s.date).toLocaleDateString()}</td>
-                  </tr>
-                ))}
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan="8">

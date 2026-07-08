@@ -1,6 +1,7 @@
 import express from 'express';
 import Product from '../models/Product.js';
 import Stock from '../models/Stock.js';
+import StockIn from '../models/StockIn.js';
 import User from '../models/User.js';
 import Category from '../models/Category.js';
 import EditRequest from '../models/EditRequest.js';
@@ -33,12 +34,21 @@ router.get(
         monthlyFlow,
         topProducts,
         categoryBreakdown,
-        colorBreakdown,
-        baleBreakdown,
-        weightBreakdown,
-        recentStock,
+        colorBreakdownOut,
+        baleBreakdownOut,
+        weightBreakdownOut,
+        recentStockOut,
         recentRequests,
-        unreadNotifications
+        unreadNotifications,
+        
+        // StockIn Queries
+        stockInTotal,
+        stockInToday,
+        monthlyFlowIn,
+        colorBreakdownIn,
+        baleBreakdownIn,
+        weightBreakdownIn,
+        recentStockIn
       ] = await Promise.all([
         // 1. Basic Counts
         Product.countDocuments(),
@@ -63,13 +73,13 @@ router.get(
 
         // 3. Total Stock Flow (In/Out)
         Stock.aggregate([
-          { $match: { status: 'Approved' } },
+          { $match: { status: 'Approved', type: 'OUT' } },
           { $group: { _id: '$type', total: { $sum: '$quantity' } } }
         ]),
 
         // 4. Today's Stock Flow (In/Out)
         Stock.aggregate([
-          { $match: { status: 'Approved', date: { $gte: today } } },
+          { $match: { status: 'Approved', date: { $gte: today }, type: 'OUT' } },
           { $group: { _id: '$type', total: { $sum: '$quantity' } } }
         ]),
 
@@ -78,9 +88,9 @@ router.get(
           { $group: { _id: '$status', count: { $sum: 1 } } }
         ]),
 
-        // 6. Monthly Stock In vs Out (Chart)
+        // 6. Monthly Stock Out (Chart)
         Stock.aggregate([
-          { $match: { status: 'Approved' } },
+          { $match: { status: 'Approved', type: 'OUT' } },
           {
             $group: {
               _id: { 
@@ -135,53 +145,26 @@ router.get(
           { $sort: { totalStock: -1 } }
         ]),
 
-        // 9. Stock by Color (Chart)
+        // 9. Stock by Color (Chart) - Out
         Stock.aggregate([
-          { $match: { status: 'Approved', color: { $ne: null, $ne: '' } } },
-          { $group: { 
-              _id: '$color', 
-              totalIn: { $sum: { $cond: [{ $eq: ['$type', 'IN'] }, '$quantity', 0] } },
-              totalOut: { $sum: { $cond: [{ $eq: ['$type', 'OUT'] }, '$quantity', 0] } }
-            } 
-          },
-          { $project: { _id: 1, totalStock: { $subtract: ['$totalIn', '$totalOut'] } } },
-          { $match: { totalStock: { $gt: 0 } } },
-          { $sort: { totalStock: -1 } },
-          { $limit: 10 }
+          { $match: { status: 'Approved', color: { $ne: null, $ne: '' }, type: 'OUT' } },
+          { $group: { _id: '$color', totalOut: { $sum: '$quantity' } } }
         ]),
 
-        // 10. Stock by Bale (Chart)
+        // 10. Stock by Bale (Chart) - Out
         Stock.aggregate([
-          { $match: { status: 'Approved', bale: { $ne: null, $ne: '' } } },
-          { $group: { 
-              _id: '$bale', 
-              totalIn: { $sum: { $cond: [{ $eq: ['$type', 'IN'] }, '$quantity', 0] } },
-              totalOut: { $sum: { $cond: [{ $eq: ['$type', 'OUT'] }, '$quantity', 0] } }
-            } 
-          },
-          { $project: { _id: 1, totalStock: { $subtract: ['$totalIn', '$totalOut'] } } },
-          { $match: { totalStock: { $gt: 0 } } },
-          { $sort: { totalStock: -1 } },
-          { $limit: 10 }
+          { $match: { status: 'Approved', bale: { $ne: null, $ne: '' }, type: 'OUT' } },
+          { $group: { _id: '$bale', totalOut: { $sum: '$quantity' } } }
         ]),
 
-        // 11. Stock by Weight (Chart)
+        // 11. Stock by Weight (Chart) - Out
         Stock.aggregate([
-          { $match: { status: 'Approved', weight: { $ne: null } } },
-          { $group: { 
-              _id: '$weight', 
-              totalIn: { $sum: { $cond: [{ $eq: ['$type', 'IN'] }, '$quantity', 0] } },
-              totalOut: { $sum: { $cond: [{ $eq: ['$type', 'OUT'] }, '$quantity', 0] } }
-            } 
-          },
-          { $project: { _id: 1, totalStock: { $subtract: ['$totalIn', '$totalOut'] } } },
-          { $match: { totalStock: { $gt: 0 } } },
-          { $sort: { totalStock: -1 } },
-          { $limit: 10 }
+          { $match: { status: 'Approved', weight: { $ne: null }, type: 'OUT' } },
+          { $group: { _id: '$weight', totalOut: { $sum: '$quantity' } } }
         ]),
 
-        // 12. Recent Stock Activity
-        Stock.find({ status: 'Approved' })
+        // 12. Recent Stock Activity (Out)
+        Stock.find({ status: 'Approved', type: 'OUT' })
           .sort({ createdAt: -1 })
           .limit(5)
           .populate('productId', 'name sku')
@@ -195,45 +178,119 @@ router.get(
           .populate('stockId'),
           
         // 14. Unread Notifications Count
-        Notification.countDocuments({ isRead: false })
+        Notification.countDocuments({ isRead: false }),
+        
+        // --- StockIn Queries ---
+        StockIn.aggregate([
+          { $match: { status: 'Approved' } },
+          { $group: { _id: 'IN', total: { $sum: '$baleCount' } } }
+        ]),
+        
+        StockIn.aggregate([
+          { $match: { status: 'Approved', poDate: { $gte: today } } },
+          { $group: { _id: 'IN', total: { $sum: '$baleCount' } } }
+        ]),
+        
+        StockIn.aggregate([
+          { $match: { status: 'Approved' } },
+          {
+            $group: {
+              _id: { 
+                year: { $year: '$poDate' }, 
+                month: { $month: '$poDate' }, 
+                type: 'IN' 
+              },
+              total: { $sum: '$baleCount' }
+            }
+          }
+        ]),
+        
+        StockIn.aggregate([
+          { $match: { status: 'Approved', color: { $ne: null, $ne: '' } } },
+          { $group: { _id: '$color', totalIn: { $sum: '$baleCount' } } }
+        ]),
+        
+        StockIn.aggregate([
+          { $match: { status: 'Approved', baleCount: { $ne: null } } },
+          { $group: { _id: '$baleCount', totalIn: { $sum: '$baleCount' } } }
+        ]),
+        
+        StockIn.aggregate([
+          { $match: { status: 'Approved', weight: { $ne: null } } },
+          { $group: { _id: '$weight', totalIn: { $sum: '$baleCount' } } }
+        ]),
+        
+        StockIn.find({ status: 'Approved' })
+          .sort({ createdAt: -1 })
+          .limit(5)
+          .populate('createdBy', 'name')
       ]);
 
       // --- Format Data ---
       
-      const getStat = (arr, id) => arr.find(item => item._id === id)?.total || 0;
-      const getReqStat = (arr, id) => arr.find(item => item._id === id)?.count || 0;
+      const getStat = (arr, id) => arr?.find(item => item._id === id)?.total || 0;
+      const getReqStat = (arr, id) => arr?.find(item => item._id === id)?.count || 0;
 
-      const totalStockIn = getStat(stockFlowTotal, 'IN');
+      const totalStockIn = getStat(stockInTotal, 'IN');
       const totalStockOut = getStat(stockFlowTotal, 'OUT');
 
       // Format monthly flow for Recharts
       const monthlyDataMap = {};
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       
-      monthlyFlow.forEach(entry => {
-        const key = `${entry._id.year}-${entry._id.month}`;
-        if (!monthlyDataMap[key]) {
-          monthlyDataMap[key] = {
-            name: `${monthNames[entry._id.month - 1]} ${entry._id.year}`,
-            'Stock In': 0,
-            'Stock Out': 0,
-            sortKey: entry._id.year * 100 + entry._id.month
-          };
-        }
-        monthlyDataMap[key][entry._id.type === 'IN' ? 'Stock In' : 'Stock Out'] = entry.total;
-      });
+      const processMonthly = (flowArray, typeStr) => {
+        flowArray.forEach(entry => {
+          const key = `${entry._id.year}-${entry._id.month}`;
+          if (!monthlyDataMap[key]) {
+            monthlyDataMap[key] = {
+              name: `${monthNames[entry._id.month - 1]} ${entry._id.year}`,
+              'Stock In': 0,
+              'Stock Out': 0,
+              sortKey: entry._id.year * 100 + entry._id.month
+            };
+          }
+          monthlyDataMap[key][typeStr] += entry.total;
+        });
+      };
+      
+      processMonthly(monthlyFlow, 'Stock Out');
+      processMonthly(monthlyFlowIn, 'Stock In');
 
       const monthlyChartData = Object.values(monthlyDataMap).sort((a, b) => a.sortKey - b.sortKey).slice(-12);
+
+      // Helper to merge aggregation breakdowns (In and Out)
+      const mergeBreakdowns = (inArr, outArr) => {
+        const map = {};
+        inArr.forEach(item => { map[item._id] = { totalIn: item.totalIn || 0, totalOut: 0 }; });
+        outArr.forEach(item => {
+          if (!map[item._id]) map[item._id] = { totalIn: 0, totalOut: 0 };
+          map[item._id].totalOut += item.totalOut || 0;
+        });
+        return Object.entries(map)
+          .map(([key, val]) => ({ name: key, value: val.totalIn - val.totalOut }))
+          .filter(x => x.value > 0)
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 10);
+      };
+
+      const colorBreakdown = mergeBreakdowns(colorBreakdownIn, colorBreakdownOut);
+      const baleBreakdown = mergeBreakdowns(baleBreakdownIn, baleBreakdownOut);
+      const weightBreakdown = mergeBreakdowns(weightBreakdownIn, weightBreakdownOut).map(c => ({ name: `${c.name}kg`, value: c.value }));
+
+      // Merge recent stock (In and Out)
+      const recentStock = [...recentStockIn.map(s => ({...s._doc, type: 'IN'})), ...recentStockOut.map(s => ({...s._doc, type: 'OUT'}))]
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, 5);
 
       res.json({
         kpis: {
           totalProducts,
           totalCategories,
           totalUsers,
-          currentInventory: totalStockIn - totalStockOut, // Or aggregate total inventoryCount from Products
+          currentInventory: totalStockIn - totalStockOut,
           totalStockIn,
           totalStockOut,
-          todayStockIn: getStat(stockFlowToday, 'IN'),
+          todayStockIn: getStat(stockInToday, 'IN'),
           todayStockOut: getStat(stockFlowToday, 'OUT'),
           pendingRequests: getReqStat(requestStats, 'Pending'),
           approvedRequests: getReqStat(requestStats, 'Approved'),
@@ -248,9 +305,9 @@ router.get(
           monthlyFlow: monthlyChartData,
           topProducts,
           categoryBreakdown: categoryBreakdown.map(c => ({ name: c._id || 'Uncategorized', value: c.totalStock })),
-          colorBreakdown: colorBreakdown.map(c => ({ name: c._id, value: c.totalStock })),
-          baleBreakdown: baleBreakdown.map(c => ({ name: c._id, value: c.totalStock })),
-          weightBreakdown: weightBreakdown.map(c => ({ name: `${c._id}kg`, value: c.totalStock })),
+          colorBreakdown,
+          baleBreakdown,
+          weightBreakdown,
         },
         recentActivity: {
           stock: recentStock,

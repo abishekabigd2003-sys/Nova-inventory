@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/api';
 import { exportToExcel } from '../../utils/excelExport';
 import './Reports.css';
 
@@ -13,12 +13,6 @@ const REPORT_TABS = [
   { key: 'bale',       label: 'Bale-wise' },
   { key: 'weight',     label: 'Weight-wise' },
 ];
-
-function getAuthHeaders() {
-  const stored = localStorage.getItem('ims_user');
-  const token = stored ? JSON.parse(stored).token : null;
-  return { headers: { Authorization: `Bearer ${token}` } };
-}
 
 export default function Reports() {
   const { tab } = useParams();
@@ -48,7 +42,7 @@ export default function Reports() {
       if (startDate) url += `&startDate=${startDate}`;
       if (endDate) url += `&endDate=${endDate}`;
       
-      const res = await axios.get(url, getAuthHeaders());
+      const res = await api.get(url);
       setData(res.data);
     } catch (err) {
       setError('Failed to load report data.');
@@ -73,12 +67,23 @@ export default function Reports() {
     if (['color', 'bale', 'weight'].includes(activeTab)) {
       return item._id?.toString().toLowerCase().includes(term);
     }
-    // Stock-in / Stock-out
+    // Stock-in (StockIn schema)
+    if (activeTab === 'stock-in') {
+      return (
+        item.poNumber?.toLowerCase().includes(term) ||
+        item.partyName?.toLowerCase().includes(term) ||
+        item.itemName?.toLowerCase().includes(term) ||
+        item.yarnCount?.toLowerCase().includes(term) ||
+        item.color?.toLowerCase().includes(term)
+      );
+    }
+
+    // Stock-out (Stock schema)
     return (
       item.productId?.name?.toLowerCase().includes(term) ||
       item.productId?.sku?.toLowerCase().includes(term) ||
       item.color?.toLowerCase().includes(term) ||
-      item.supplier?.toLowerCase().includes(term) ||
+      item.customerName?.toLowerCase().includes(term) ||
       item.destination?.toLowerCase().includes(term)
     );
   });
@@ -160,7 +165,48 @@ export default function Reports() {
       );
     }
 
-    // Stock In / Stock Out transaction reports
+    // Stock In report (StockIn schema)
+    if (activeTab === 'stock-in') {
+      return (
+        <table className="enterprise-table" id="report-table">
+          <thead>
+            <tr>
+              <th>PO Date</th>
+              <th>PO Number</th>
+              <th>Party Name</th>
+              <th>Item Details</th>
+              <th>Color</th>
+              <th>Bales</th>
+              <th>Weight (kg)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.map((s) => (
+              <tr key={s._id}>
+                <td className="text-tertiary">{new Date(s.poDate).toLocaleDateString()}</td>
+                <td><strong>{s.poNumber || '—'}</strong></td>
+                <td>{s.partyName || '—'}</td>
+                <td>{s.itemName} {s.yarnCount ? `(${s.yarnCount})` : ''}</td>
+                <td>{s.color || '—'}</td>
+                <td>{s.baleCount || '—'}</td>
+                <td>{s.weight || '—'}</td>
+                <td>
+                  <span className={`badge ${s.status === 'Approved' ? 'badge-success' : 'badge-neutral'}`}>
+                    {s.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {filteredData.length === 0 && (
+              <tr><td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>No records found.</td></tr>
+            )}
+          </tbody>
+        </table>
+      );
+    }
+
+    // Stock Out transaction report (Stock schema)
     return (
       <table className="enterprise-table" id="report-table">
         <thead>
@@ -172,7 +218,7 @@ export default function Reports() {
             <th>Color</th>
             <th>Bale</th>
             <th>Weight (kg)</th>
-            {activeTab === 'stock-in' ? <th>Supplier</th> : <th>Destination</th>}
+            <th>Customer/Destination</th>
             <th>Date</th>
           </tr>
         </thead>
@@ -186,7 +232,7 @@ export default function Reports() {
               <td>{s.color || '—'}</td>
               <td>{s.bale || '—'}</td>
               <td>{s.weight || '—'}</td>
-              <td>{s.supplier || s.destination || '—'}</td>
+              <td>{s.customerName || s.destination || '—'}</td>
               <td className="text-tertiary">{new Date(s.date).toLocaleDateString()}</td>
             </tr>
           ))}
@@ -199,7 +245,7 @@ export default function Reports() {
   };
 
   const totalItems = filteredData.length;
-  const totalQty = filteredData.reduce((s, r) => s + (r.quantity || r.totalQuantity || r.inventoryCount || 0), 0);
+  const totalQty = filteredData.reduce((s, r) => s + (r.quantity || r.totalQuantity || r.inventoryCount || r.baleCount || 0), 0);
 
   return (
     <div className="page-container">

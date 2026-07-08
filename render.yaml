@@ -1,53 +1,73 @@
 services:
-  # 1. Admin Service (Handles Database and Business Logic)
   - type: web
     name: ims-admin-service
     env: node
     rootDir: inventory-management-system/backend/admin-service
-    buildCommand: npm install -g npm@11 && npm ci
+    buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /health
-    autoDeploy: false # Deployed via GitHub Actions
     envVars:
-      - key: PORT
-        value: 5001
-      - key: MONGO_URI
-        sync: false # Requires manual entry in Render Dashboard
-      - key: JWT_SECRET
-        sync: false # Requires manual entry in Render Dashboard
       - key: NODE_ENV
         value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
       - key: API_GATEWAY_URL
-        sync: false # Must be set in Render dashboard to match the API Gateway URL
+        fromService:
+          type: web
+          name: ims-api-gateway
+          envVarKey: RENDER_EXTERNAL_URL
       - key: FRONTEND_URL
-        sync: false # Must be set in Render dashboard to match the Frontend URL
+        fromService:
+          type: web
+          name: ims-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+    disk:
+      name: uploads
+      mountPath: /data/uploads
+      sizeGB: 1
 
-  # 2. API Gateway (Handles rate limiting, security headers, routing)
   - type: web
     name: ims-api-gateway
     env: node
     rootDir: inventory-management-system/backend/api-gateway
-    buildCommand: npm install -g npm@11 && npm ci
+    buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /health
-    autoDeploy: false # Deployed via GitHub Actions
     envVars:
-      - key: PORT
-        value: 5000
       - key: NODE_ENV
         value: production
       - key: ADMIN_SERVICE_URL
-        value: "http://ims-admin-service:5001" # Internal Render networking URL
+        fromService:
+          type: web
+          name: ims-admin-service
+          envVarKey: RENDER_EXTERNAL_URL
       - key: FRONTEND_URL
-        sync: false # Must be set in Render dashboard to match the Frontend URL
+        fromService:
+          type: web
+          name: ims-frontend
+          envVarKey: RENDER_EXTERNAL_URL
 
-  # 3. Frontend (Static Site)
-  - type: static
+  - type: web
     name: ims-frontend
+    env: static
     rootDir: inventory-management-system/frontend
-    buildCommand: npm install -g npm@11 && npm ci && npm run build
+    buildCommand: npm install && npm run build
     staticPublishPath: dist
-    autoDeploy: false # Deployed via GitHub Actions
     envVars:
       - key: VITE_API_URL
-        sync: false # Must be set in Render dashboard to match the API Gateway URL
+        fromService:
+          type: web
+          name: ims-api-gateway
+          envVarKey: RENDER_EXTERNAL_URL

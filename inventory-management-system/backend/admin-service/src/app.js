@@ -68,7 +68,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 
 // Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+const uploadDir = process.env.UPLOAD_DIR 
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(__dirname, '../../uploads');
+app.use('/uploads', express.static(uploadDir));
 
 // Health check
 app.get('/health', (req, res) =>

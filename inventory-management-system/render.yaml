@@ -1,0 +1,73 @@
+services:
+  - type: web
+    name: ims-admin-service
+    env: node
+    rootDir: backend/admin-service
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: API_GATEWAY_URL
+        fromService:
+          type: web
+          name: ims-api-gateway
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: ims-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+    disk:
+      name: uploads
+      mountPath: /data/uploads
+      sizeGB: 1
+
+  - type: web
+    name: ims-api-gateway
+    env: node
+    rootDir: backend/api-gateway
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_SERVICE_URL
+        fromService:
+          type: web
+          name: ims-admin-service
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: ims-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: ims-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: ims-api-gateway
+          envVarKey: RENDER_EXTERNAL_URL

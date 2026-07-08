@@ -104,3 +104,7 @@ dist
 
 # Windows
 Thumbs.db
+
+*.err
+qa-tests/test-results/
+qa-tests/playwright-report/

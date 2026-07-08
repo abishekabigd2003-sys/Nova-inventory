@@ -7,7 +7,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Ensure uploads directory exists
-const uploadDir = path.join(__dirname, '../../uploads');
+const uploadDir = process.env.UPLOAD_DIR 
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(__dirname, '../../uploads');
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const API_BASE = 'http://127.0.0.1:5000/api';
+const API_BASE = process.env.API_GATEWAY_URL ? `${process.env.API_GATEWAY_URL}/api` : 'http://127.0.0.1:5000/api';
 
 test.describe('API Endpoint Validations', () => {
   let token = '';

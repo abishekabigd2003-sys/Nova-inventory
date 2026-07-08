@@ -1,6 +1,7 @@
 services:
   - type: web
     name: ims-admin-service
+    plan: free
     env: node
     rootDir: inventory-management-system/backend/admin-service
     buildCommand: npm install
@@ -23,7 +24,7 @@ services:
           name: ims-frontend
           envVarKey: RENDER_EXTERNAL_URL
       - key: UPLOAD_DIR
-        value: /data/uploads
+        value: /tmp/uploads
       - key: EMAIL_HOST
         sync: false
       - key: EMAIL_PORT
@@ -34,13 +35,10 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
-    disk:
-      name: uploads
-      mountPath: /data/uploads
-      sizeGB: 1
 
   - type: web
     name: ims-api-gateway
+    plan: free
     env: node
     rootDir: inventory-management-system/backend/api-gateway
     buildCommand: npm install

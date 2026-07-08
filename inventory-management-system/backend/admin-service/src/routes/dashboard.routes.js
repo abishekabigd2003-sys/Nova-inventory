@@ -4,6 +4,7 @@ import Stock from '../models/Stock.js';
 import User from '../models/User.js';
 import Category from '../models/Category.js';
 import EditRequest from '../models/EditRequest.js';
+import Notification from '../models/Notification.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -36,7 +37,8 @@ router.get(
         baleBreakdown,
         weightBreakdown,
         recentStock,
-        recentRequests
+        recentRequests,
+        unreadNotifications
       ] = await Promise.all([
         // 1. Basic Counts
         Product.countDocuments(),
@@ -190,7 +192,10 @@ router.get(
           .sort({ createdAt: -1 })
           .limit(5)
           .populate('userId', 'name')
-          .populate('stockId')
+          .populate('stockId'),
+          
+        // 14. Unread Notifications Count
+        Notification.countDocuments({ isRead: false })
       ]);
 
       // --- Format Data ---
@@ -233,6 +238,7 @@ router.get(
           pendingRequests: getReqStat(requestStats, 'Pending'),
           approvedRequests: getReqStat(requestStats, 'Approved'),
           rejectedRequests: getReqStat(requestStats, 'Rejected'),
+          unreadNotifications: unreadNotifications,
         },
         alerts: {
           lowStock: inventoryStatus[0].lowStock,

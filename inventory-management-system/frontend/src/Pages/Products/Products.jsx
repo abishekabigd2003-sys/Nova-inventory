@@ -115,11 +115,11 @@ const Products = () => {
     {
       header: 'Actions',
       render: (row) => (
-        <div className="action-buttons">
-          <button className="btn-icon tooltip" data-tooltip="Edit" onClick={() => handleOpenDrawer(row)}>
+        <div className="inline-actions">
+          <button className="action-btn edit-btn" title="Edit" onClick={() => handleOpenDrawer(row)}>
             <Edit2 size={16} />
           </button>
-          <button className="btn-icon btn-icon--danger tooltip" data-tooltip="Delete" onClick={() => deleteProduct(row._id)}>
+          <button className="action-btn delete-btn" title="Delete" onClick={() => deleteProduct(row._id)}>
             <Trash2 size={16} />
           </button>
         </div>

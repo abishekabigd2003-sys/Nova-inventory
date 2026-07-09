@@ -163,19 +163,19 @@ export default function DataTable({
                   ))}
                   {(onView || onEdit || onDelete) && (
                     <td className="text-right">
-                      <div className="action-buttons">
+                      <div className="inline-actions" style={{ justifyContent: 'flex-end' }}>
                         {onView && (
-                          <button onClick={() => onView(row)} className="action-btn" title="View">
+                          <button onClick={() => onView(row)} className="action-btn view-btn" title="View">
                             <Eye size={16} />
                           </button>
                         )}
                         {onEdit && (
-                          <button onClick={() => onEdit(row)} className="action-btn text-primary" title="Edit">
+                          <button onClick={() => onEdit(row)} className="action-btn edit-btn" title="Edit">
                             <Edit size={16} />
                           </button>
                         )}
                         {onDelete && (
-                          <button onClick={() => onDelete(row)} className="action-btn text-danger" title="Delete">
+                          <button onClick={() => onDelete(row)} className="action-btn delete-btn" title="Delete">
                             <Trash2 size={16} />
                           </button>
                         )}

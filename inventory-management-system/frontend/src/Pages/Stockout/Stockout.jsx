@@ -464,27 +464,27 @@ const Stockout = () => {
                       </span>
                     </td>
                     <td>
-                      <div className="so-actions">
+                      <div className="inline-actions">
                         <button
-                          className="so-action-btn so-action-view"
+                          className="action-btn view-btn"
                           title="View Details"
                           onClick={() => setViewRecord(r)}
                         >
-                          <Eye size={15} />
+                          <Eye size={16} />
                         </button>
                         <button
-                          className="so-action-btn so-action-edit"
+                          className="action-btn edit-btn"
                           title="Edit Record"
                           onClick={() => setEditRecord({ ...r, date: r.date?.split('T')[0] || '' })}
                         >
-                          <Edit2 size={15} />
+                          <Edit2 size={16} />
                         </button>
                         <button
-                          className="so-action-btn so-action-delete"
+                          className="action-btn delete-btn"
                           title="Delete Record"
                           onClick={() => setDeleteTarget(r)}
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>

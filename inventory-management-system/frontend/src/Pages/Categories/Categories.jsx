@@ -67,11 +67,11 @@ const Categories = () => {
     {
       header: 'Actions',
       render: (row) => (
-        <div className="action-buttons">
-          <button className="btn-icon" onClick={() => handleOpenDrawer(row)}>
+        <div className="inline-actions">
+          <button className="action-btn edit-btn" title="Edit" onClick={() => handleOpenDrawer(row)}>
             <Edit2 size={16} />
           </button>
-          <button className="btn-icon btn-icon--danger" onClick={() => deleteCategory(row._id)}>
+          <button className="action-btn delete-btn" title="Delete" onClick={() => deleteCategory(row._id)}>
             <Trash2 size={16} />
           </button>
         </div>

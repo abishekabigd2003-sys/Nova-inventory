@@ -21,9 +21,9 @@ const Modal = ({ open, onClose, title, children, width = 560 }) => {
 };
 
 const DetailRow = ({ label, value }) => (
-  <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', padding: '12px 0' }}>
-    <span style={{ width: '140px', color: 'var(--text-secondary)', fontWeight: 500 }}>{label}</span>
-    <span style={{ flex: 1, color: 'var(--text-primary)', fontWeight: 600 }}>{value || '—'}</span>
+  <div className="detail-row">
+    <span className="detail-label">{label}</span>
+    <span className="detail-value">{value || '—'}</span>
   </div>
 );
 
@@ -84,7 +84,7 @@ export default function UserStockIn() {
 
       <div className="card">
         <div className="table-toolbar">
-          <div className="table-search">
+          <div className="search-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
             </svg>
@@ -132,25 +132,26 @@ export default function UserStockIn() {
                     <td>{r.weight || '—'}</td>
                     <td>{r.supplier || '—'}</td>
                     <td className="text-tertiary">{new Date(r.date).toLocaleDateString()}</td>
-                    <td style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={() => setViewRecord(r)}
-                        title="View Details"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline"
-                        onClick={() => setSelectedStock(r)}
-                        title="Request to edit this record"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="13" height="13">
-                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                        Edit Request
-                      </button>
+                    <td>
+                      <div className="inline-actions">
+                        <button
+                          className="action-btn view-btn"
+                          onClick={() => setViewRecord(r)}
+                          title="View Details"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          className="action-btn edit-btn"
+                          onClick={() => setSelectedStock(r)}
+                          title="Request Edit"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

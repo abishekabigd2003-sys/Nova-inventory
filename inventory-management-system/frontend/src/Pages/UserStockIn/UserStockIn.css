@@ -19,6 +19,33 @@
   white-space: nowrap;
 }
 
-.text-tertiary { color: var(--text-tertiary); }
+.usi-loading { 
+  padding: 8px 0; 
+}
 
-.usi-loading { padding: 8px 0; }
+/* Detail Modal Styles */
+.detail-row {
+  display: flex;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 0;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  min-width: 140px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 600;
+  word-break: break-word;
+}

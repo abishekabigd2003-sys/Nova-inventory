@@ -137,6 +137,44 @@ export default function UserProfile() {
                     />
                   </div>
                 </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input
+                      type="text"
+                      value={user.phone || 'Not provided'}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Account Status</label>
+                    <input
+                      type="text"
+                      value={user.isActive === false ? 'Inactive' : 'Active'}
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Joined Date</label>
+                    <input
+                      type="text"
+                      value={user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Last Login</label>
+                    <input
+                      type="text"
+                      value={user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Not available'}
+                      disabled
+                    />
+                  </div>
+                </div>
               </>
             )}
 

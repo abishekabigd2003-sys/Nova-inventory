@@ -33,7 +33,7 @@ function useBreadcrumb() {
 }
 
 export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -113,11 +113,6 @@ export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
     { code: 'DE', label: 'Deutsch' },
     { code: 'JA', label: '日本語' },
   ];
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
-  };
 
   return (
     <header className="navbar" role="banner">
@@ -229,37 +224,50 @@ export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
 
         {/* Profile menu */}
         <div className="navbar-dropdown" ref={profileRef}>
-          <button
-            className="profile-btn"
-            onClick={() => setProfileOpen((o) => !o)}
-            aria-haspopup="menu"
-            aria-expanded={profileOpen}
-            aria-label="User menu"
-          >
-            <span className="avatar" aria-hidden="true">
-              {user?.name?.[0]?.toUpperCase() || 'A'}
-              <span className="online-dot" aria-label="Online" />
-            </span>
-            <span className="profile-meta">
-              <span className="profile-name">{user?.name || 'Admin User'}</span>
-              <span className="profile-role">Inventory Manager</span>
-            </span>
-            <svg
-              className={`chev ${profileOpen ? 'is-open' : ''}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              aria-hidden="true"
+          <div className="profile-btn" style={{ padding: 0, display: 'flex', alignItems: 'center' }}>
+            <div 
+              onClick={() => navigate('profile')} 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
+              title="View Profile"
             >
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
+              <span className="avatar" aria-hidden="true">
+                {user?.name?.[0]?.toUpperCase() || 'A'}
+                <span className="online-dot" aria-label="Online" />
+              </span>
+              <span className="profile-meta">
+                <span className="profile-name">{user?.name || 'Admin User'}</span>
+                <span className="profile-role">{user?.role || 'User'}</span>
+              </span>
+            </div>
+            <button
+              onClick={() => setProfileOpen((o) => !o)}
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              aria-label="User menu"
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center' }}
+            >
+              <svg
+                className={`chev ${profileOpen ? 'is-open' : ''}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          </div>
 
           {profileOpen && (
             <div className="dropdown-menu profile-menu" role="menu">
-              <div className="profile-menu-header">
+              <div 
+                className="profile-menu-header" 
+                onClick={() => { navigate('profile'); setProfileOpen(false); }} 
+                style={{ cursor: 'pointer' }}
+                role="menuitem"
+              >
                 <span className="avatar avatar-lg" aria-hidden="true">
                   {user?.name?.[0]?.toUpperCase() || 'A'}
                 </span>
@@ -269,9 +277,21 @@ export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
                 </div>
               </div>
               <div className="dropdown-sep" role="separator" />
-              <button className="dropdown-item is-danger" role="menuitem" onClick={handleLogout}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-                Sign out
+              <button 
+                className="dropdown-item" 
+                role="menuitem" 
+                onClick={() => { navigate('profile'); setProfileOpen(false); }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/><path d="M12 14c-4.42 0-8 2.69-8 6v2h16v-2c0-3.31-3.58-6-8-6z"/></svg>
+                My Profile
+              </button>
+              <button 
+                className="dropdown-item" 
+                role="menuitem" 
+                onClick={() => { navigate('settings'); setProfileOpen(false); }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Settings
               </button>
             </div>
           )}

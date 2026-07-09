@@ -97,6 +97,7 @@ export default function App() {
         {/* Admin only for approvals */}
         <Route path="reports/:tab?" element={<RequireAuth roles={['Admin', 'Manager']}><Reports /></RequireAuth>} />
         <Route path="approval"   element={<RequireAuth roles={['Admin']}><Approval /></RequireAuth>} />
+        <Route path="profile"    element={<UserProfile />} />
       </Route>
 
       {/* ─────────────── USER / STAFF routes ─────────────── */}

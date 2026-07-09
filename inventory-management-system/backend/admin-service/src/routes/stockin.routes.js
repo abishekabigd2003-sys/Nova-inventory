@@ -26,6 +26,7 @@ router.get('/', protect, async (req, res, next) => {
 
     const records = await StockIn.find(query)
       .populate('createdBy', 'name email role')
+      .populate('updatedBy', 'name email role')
       .populate('auditHistory.performedBy', 'name email role')
       .sort({ poDate: -1, createdAt: -1 });
 
@@ -42,6 +43,7 @@ router.get('/:id', protect, async (req, res, next) => {
   try {
     const record = await StockIn.findById(req.params.id)
       .populate('createdBy', 'name email role')
+      .populate('updatedBy', 'name email role')
       .populate('auditHistory.performedBy', 'name email role');
 
     if (!record) {
@@ -92,6 +94,7 @@ router.post('/', protect, async (req, res, next) => {
 
     const populated = await StockIn.findById(record._id)
       .populate('createdBy', 'name email role')
+      .populate('updatedBy', 'name email role')
       .populate('auditHistory.performedBy', 'name email role');
     res.status(201).json(populated);
   } catch (error) {
@@ -143,6 +146,7 @@ router.put('/:id', protect, authorize('Admin'), async (req, res, next) => {
     const updated = await record.save();
     const populated = await StockIn.findById(updated._id)
       .populate('createdBy', 'name email role')
+      .populate('updatedBy', 'name email role')
       .populate('auditHistory.performedBy', 'name email role');
 
     res.json(populated);

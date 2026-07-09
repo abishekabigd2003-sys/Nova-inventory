@@ -44,6 +44,14 @@ const DetailRow = ({ label, value }) => (
   </div>
 );
 
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '—';
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
 export default function UserStockIn() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -285,17 +293,23 @@ export default function UserStockIn() {
       <Modal open={!!viewRecord} onClose={() => setViewRecord(null)} title="Stock In Details">
         {viewRecord && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <DetailRow label="PO Number" value={viewRecord.poNumber || viewRecord.invoiceNumber} />
-            <DetailRow label="PO Date" value={new Date(viewRecord.poDate || viewRecord.date).toLocaleDateString()} />
-            <DetailRow label="Party Name" value={viewRecord.partyName || viewRecord.supplier} />
-            <DetailRow label="Item Name" value={viewRecord.itemName || viewRecord.productId?.name} />
-            <DetailRow label="Yarn Count" value={viewRecord.yarnCount || viewRecord.itemType} />
-            <DetailRow label="Colour" value={viewRecord.color} />
-            <DetailRow label="Number of Bales" value={viewRecord.baleCount || viewRecord.bale} />
-            <DetailRow label="Weight (kg)" value={viewRecord.weight} />
-            <DetailRow label="Created By" value={viewRecord.createdBy?.name || 'Unknown'} />
-            <DetailRow label="Created Date & Time" value={new Date(viewRecord.createdAt || viewRecord.date).toLocaleString()} />
-            <DetailRow label="Current Status" value={viewRecord.status || 'Approved'} />
+            <DetailRow label="PO Number" value={viewRecord.poNumber || viewRecord.invoiceNumber || '—'} />
+            <DetailRow label="PO Date" value={formatDateTime(viewRecord.poDate || viewRecord.date)} />
+            <DetailRow label="Party Name" value={viewRecord.partyName || viewRecord.supplier || '—'} />
+            <DetailRow label="Item Name" value={viewRecord.itemName || viewRecord.productId?.name || '—'} />
+            <DetailRow label="Yarn Count" value={viewRecord.yarnCount || viewRecord.itemType || '—'} />
+            <DetailRow label="Colour" value={viewRecord.color || '—'} />
+            <DetailRow label="Number of Bales" value={viewRecord.baleCount || viewRecord.bale || '—'} />
+            <DetailRow label="Weight (KG)" value={viewRecord.weight || '—'} />
+            <DetailRow label="Created By" value={viewRecord.createdBy?.name || '—'} />
+            <DetailRow label="Created Date" value={formatDateTime(viewRecord.createdAt || viewRecord.date)} />
+            <DetailRow label="Last Updated By" value={viewRecord.updatedBy?.name || '—'} />
+            <DetailRow label="Last Updated Date" value={formatDateTime(viewRecord.updatedAt)} />
+            <DetailRow label="Current Status" value={
+              <span className={`badge badge-${viewRecord.status === 'Approved' ? 'success' : viewRecord.status === 'Pending' ? 'warning' : viewRecord.status === 'Rejected' ? 'danger' : 'neutral'}`}>
+                {viewRecord.status || 'Approved'}
+              </span>
+            } />
           </div>
         )}
       </Modal>

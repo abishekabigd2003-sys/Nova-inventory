@@ -95,7 +95,7 @@ router.put(
 // @desc    Update product inventory count (called internally by stock routes)
 // @route   PUT /api/products/:id/inventory
 // @access  Private
-router.put('/:id/inventory', protect, async (req, res, next) => {
+router.put('/:id/inventory', protect, authorize('Admin'), async (req, res, next) => {
   try {
     const { action, amount } = req.body;
     const delta =

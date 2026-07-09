@@ -5,10 +5,10 @@
 }
 
 .stockin-grid {
-  display: grid;
-  grid-template-columns: 350px 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* --- Left Pane: Form --- */
@@ -33,8 +33,15 @@
   margin: 0;
 }
 
+.stockin-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
 .stockin-form .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .stockin-form label {
@@ -67,18 +74,17 @@
 }
 
 .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: contents; /* Fallback if any remain */
 }
 
 .submit-btn {
-  margin-top: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   font-weight: 600;
+  height: 40px; /* match input heights approximately */
+  grid-column: 1 / -1; /* Make button span full width underneath */
 }
 
 /* --- Right Pane: Table Log --- */
@@ -312,8 +318,10 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-  .stockin-grid {
+
+
+@media (max-width: 768px) {
+  .stockin-form {
     grid-template-columns: 1fr;
   }
 }

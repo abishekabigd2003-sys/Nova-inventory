@@ -168,15 +168,14 @@ const Stockin = () => {
               <input type="text" name="partyName" value={formData.partyName} onChange={handleFormChange} placeholder="Supplier / Vendor" required />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Yarn Count</label>
-                <input type="text" name="yarnCount" value={formData.yarnCount} onChange={handleFormChange} placeholder="e.g. 40s" required />
-              </div>
-              <div className="form-group">
-                <label>Item Name</label>
-                <input type="text" name="itemName" value={formData.itemName} onChange={handleFormChange} placeholder="e.g. Cotton" required />
-              </div>
+            <div className="form-group">
+              <label>Yarn Count</label>
+              <input type="text" name="yarnCount" value={formData.yarnCount} onChange={handleFormChange} placeholder="e.g. 40s" required />
+            </div>
+            
+            <div className="form-group">
+              <label>Item Name</label>
+              <input type="text" name="itemName" value={formData.itemName} onChange={handleFormChange} placeholder="e.g. Cotton" required />
             </div>
 
             <div className="form-group">
@@ -184,15 +183,14 @@ const Stockin = () => {
               <input type="text" name="color" value={formData.color} onChange={handleFormChange} placeholder="e.g. White, Natural" />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>No. of Bales</label>
-                <input type="number" name="baleCount" min="1" value={formData.baleCount} onChange={handleFormChange} placeholder="10" required />
-              </div>
-              <div className="form-group">
-                <label>Weight (KG)</label>
-                <input type="number" step="0.01" min="0" name="weight" value={formData.weight} onChange={handleFormChange} placeholder="50.0" required />
-              </div>
+            <div className="form-group">
+              <label>No. of Bales</label>
+              <input type="number" name="baleCount" min="1" value={formData.baleCount} onChange={handleFormChange} placeholder="10" required />
+            </div>
+            
+            <div className="form-group">
+              <label>Weight (KG)</label>
+              <input type="number" step="0.01" min="0" name="weight" value={formData.weight} onChange={handleFormChange} placeholder="50.0" required />
             </div>
 
             <button type="submit" className="btn btn-primary w-100 submit-btn" disabled={submitLoading}>

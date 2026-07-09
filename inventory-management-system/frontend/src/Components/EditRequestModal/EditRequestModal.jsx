@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../api/api';
 import SearchableDropdown from '../SearchableDropdown/SearchableDropdown';
 import './EditRequestModal.css';
@@ -33,7 +33,7 @@ export default function EditRequestModal({ stock, onClose, onSuccess }) {
   const [error,   setError]   = useState('');
 
   // Handle ESC key to close
-  React.useEffect(() => {
+  useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose();
     };

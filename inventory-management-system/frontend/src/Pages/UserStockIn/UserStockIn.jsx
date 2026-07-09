@@ -112,7 +112,7 @@ export default function UserStockIn() {
         // Open form to create a new request
         setSelectedStock(stockRecord);
       }
-    } catch (err) {
+    } catch {
       showToast('Error checking active requests.', 'error');
       // Fallback: just open the request modal
       setSelectedStock(stockRecord);
@@ -128,7 +128,7 @@ export default function UserStockIn() {
       if (request) {
         setEditTarget(request);
       }
-    } catch (err) {
+    } catch {
       showToast('Error loading edit form.', 'error');
     }
     setOtpRequestId(null);

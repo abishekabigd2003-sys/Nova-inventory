@@ -275,19 +275,83 @@
 }
 
 @media (max-width: 768px) {
-  .signin-page { height: auto; min-height: 100vh; overflow-y: auto; overflow-x: hidden; padding: 0; width: 100%; max-width: 100vw; }
-  .signin-card { flex-direction: column; height: auto; min-height: 100vh; max-height: none; border-radius: 0; box-shadow: none; width: 100%; max-width: 100vw; overflow-x: hidden; }
-  .signin-image { width: 100%; height: 260px; flex-shrink: 0; }
-  .signin-form-panel { width: 100%; justify-content: flex-start; flex: 1; }
-  .signin-form-inner { max-width: 100%; width: 100%; padding: 32px 24px 48px; margin: 0 auto; }
+  .signin-page { 
+    height: auto; 
+    min-height: 100vh; 
+    overflow-y: auto; 
+    overflow-x: hidden; 
+    padding: 0; 
+    width: 100%; 
+  }
+  .signin-card { 
+    flex-direction: column; 
+    height: auto; 
+    min-height: 100vh; 
+    max-height: none; 
+    border-radius: 0; 
+    box-shadow: none; 
+    width: 100%; 
+    overflow-x: hidden; 
+  }
+  
+  /* Responsive image container without fixed height */
+  .signin-image { 
+    width: 100%; 
+    height: auto; 
+    flex-shrink: 0; 
+  }
+  .signin-image img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Prevents image cropping */
+    top: 0;
+    left: 0;
+  }
+  /* First image dictates container height natively */
+  .signin-image img:first-child {
+    position: relative;
+    height: auto;
+  }
+
+  .signin-form-panel { 
+    width: 100%; 
+    justify-content: flex-start; 
+    flex: 1; 
+  }
+  .signin-form-inner { 
+    max-width: 100%; 
+    width: 100%; 
+    padding: 32px 24px 48px; 
+    margin: 0 auto; 
+  }
 }
 
 @media (max-width: 480px) {
-  .signin-image { height: 200px; }
-  .signin-form-inner { padding: 24px 16px 40px; }
+  .signin-form-inner { 
+    padding: 24px 20px 48px; 
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  }
   .signin-header h1 { font-size: 24px; }
-  .signin-header p { font-size: 13.5px; }
-  .social-row { grid-template-columns: 1fr; gap: 8px; }
-  .signin-form input { font-size: 14px; padding: 12px; }
-  .btn.btn-primary, .signin-btn { height: 44px; font-size: 14.5px; }
+  .signin-header p { font-size: 14px; }
+  
+  /* Touch target improvements */
+  .social-row { grid-template-columns: 1fr; gap: 12px; }
+  .social-btn { 
+    height: 48px; 
+    font-size: 14.5px; 
+  }
+  
+  /* Input sizing to prevent iOS zoom (16px min) and better touch */
+  .signin-form input { 
+    font-size: 16px; 
+    padding: 14px; 
+  }
+  .form-group label, .label-row label {
+    font-size: 14px;
+  }
+  .btn.btn-primary, .signin-btn { 
+    height: 48px; 
+    font-size: 15px; 
+  }
 }

@@ -203,7 +203,10 @@ const Stockin = () => {
         {/* Right Pane: Table Log */}
         <div className="stockin-table-pane">
           <div className="table-pane-header">
-            <h3>Stock In Log</h3>
+            <div className="table-header-left">
+              <h3>Stock In Log</h3>
+              <span className="badge badge-neutral">{records.length} Records</span>
+            </div>
             <div className="table-actions">
               <div className="search-box">
                 <Search size={16} />
@@ -277,7 +280,7 @@ const Stockin = () => {
                         <>
                           <td>{new Date(record.poDate).toLocaleDateString()}</td>
                           <td className="font-medium">{record.poNumber}</td>
-                          <td>{record.partyName}</td>
+                          <td><div className="truncate-text" title={record.partyName}>{record.partyName}</div></td>
                           <td>
                             <div className="item-details">
                               <span className="item-name">{record.itemName}</span>

@@ -5,10 +5,22 @@
 }
 
 .stockin-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 24px;
-  align-items: stretch;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .stockin-grid {
+    grid-template-columns: 320px 1fr;
+  }
+}
+
+@media (min-width: 1440px) {
+  .stockin-grid {
+    grid-template-columns: 360px 1fr;
+  }
 }
 
 /* --- Left Pane: Form --- */
@@ -35,9 +47,17 @@
 
 .stockin-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: end;
+}
+
+/* On larger screens, the grid is in sidebar so it stays 1fr. 
+   If it's on top (mobile/tablet), we can make it 2 cols */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .stockin-form {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
 }
 
 .stockin-form .form-group {
@@ -70,11 +90,7 @@
 .stockin-form select:focus {
   border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 0 3px var(--primary-100);
-}
-
-.form-row {
-  display: contents; /* Fallback if any remain */
+  box-shadow: 0 0 0 3px var(--primary-100, rgba(59, 130, 246, 0.2));
 }
 
 .submit-btn {
@@ -83,8 +99,9 @@
   justify-content: center;
   gap: 8px;
   font-weight: 600;
-  height: 40px; /* match input heights approximately */
-  grid-column: 1 / -1; /* Make button span full width underneath */
+  height: 42px;
+  grid-column: 1 / -1; 
+  margin-top: 8px;
 }
 
 /* --- Right Pane: Table Log --- */
@@ -100,15 +117,23 @@
 }
 
 .table-pane-header {
-  padding: 20px 24px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-card-alt);
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.table-pane-header h3 {
+.table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.table-header-left h3 {
   font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
@@ -119,6 +144,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .search-box {
@@ -128,20 +154,34 @@
   background: var(--bg-input);
   border: 1px solid var(--border-default);
   border-radius: 8px;
-  padding: 6px 12px;
+  padding: 8px 14px;
+  min-width: 260px;
+  transition: all 0.2s ease;
+}
+
+.search-box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--primary-100, rgba(59, 130, 246, 0.2));
 }
 
 .search-box input {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
-  width: 200px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.search-box input::placeholder {
+  color: var(--text-tertiary);
 }
 
 .search-box svg {
   color: var(--text-tertiary);
+  flex-shrink: 0;
 }
 
 .table-responsive {
@@ -169,7 +209,7 @@
 
 .erp-table td {
   padding: 14px 20px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
@@ -181,6 +221,13 @@
 
 .font-medium {
   font-weight: 600;
+}
+
+.truncate-text {
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .item-details {
@@ -205,7 +252,13 @@
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+}
+
+.badge-neutral {
+  background: var(--bg-muted, #f1f5f9);
+  color: var(--text-secondary, #475569);
+  border: 1px solid var(--border-default, #e2e8f0);
 }
 
 .badge-warning {
@@ -230,22 +283,82 @@
 .status-pending { background: var(--color-warning-bg); color: var(--warning-600); }
 .status-rejected { background: var(--color-danger-bg); color: var(--danger-600); }
 
+/* Inline Actions */
+.inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.delete-btn:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger);
+}
+
+.edit-btn:hover {
+  color: var(--color-primary);
+  background: var(--primary-50, #eff6ff);
+  border-color: var(--color-primary);
+}
+
 /* Inline Edit */
 .edit-input {
   width: 100%;
-  padding: 6px 8px;
+  padding: 8px 10px;
   font-size: 13px;
-  border: 1px solid var(--color-primary);
-  border-radius: 4px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
   background: var(--bg-input);
   color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+.edit-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
 }
 
-.edit-input.warning-bg { border-color: var(--color-warning); }
-.edit-input.success-bg { border-color: var(--color-success); }
+.edit-input.warning-bg { border-color: var(--color-warning); background: var(--color-warning-bg); }
+.edit-input.success-bg { border-color: var(--color-success); background: var(--color-success-bg); }
 .mb-1 { margin-bottom: 4px; }
-
-
+.actions-cell {
+  white-space: nowrap;
+}
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.btn-icon:hover {
+  background: var(--bg-hover);
+}
+.text-success { color: var(--color-success); }
+.text-danger { color: var(--color-danger); }
 
 /* States */
 .loading-state,
@@ -257,6 +370,8 @@
   padding: 60px 20px;
   color: var(--text-tertiary);
   gap: 16px;
+  height: 100%;
+  min-height: 300px;
 }
 
 .spin {
@@ -269,10 +384,16 @@
 }
 
 /* Responsive */
-
-
 @media (max-width: 768px) {
-  .stockin-form {
-    grid-template-columns: 1fr;
+  .table-pane-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .table-actions {
+    justify-content: space-between;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 0;
   }
 }

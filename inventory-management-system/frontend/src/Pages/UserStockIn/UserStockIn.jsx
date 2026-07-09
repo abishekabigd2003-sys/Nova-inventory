@@ -37,7 +37,7 @@ export default function UserStockIn() {
 
   const fetchRecords = useCallback(async () => {
     try {
-      const { data } = await api.get('/api/stock?type=IN&status=Approved');
+      const { data } = await api.get('/api/stockin?status=Approved');
       setRecords(data);
     } catch {
       showToast('Failed to load stock records.', 'error');
@@ -54,10 +54,10 @@ export default function UserStockIn() {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      r.productId?.name?.toLowerCase().includes(q) ||
-      r.productId?.sku?.toLowerCase().includes(q)  ||
-      r.color?.toLowerCase().includes(q)            ||
-      r.supplier?.toLowerCase().includes(q)
+      r.poNumber?.toLowerCase().includes(q) ||
+      r.partyName?.toLowerCase().includes(q) ||
+      r.itemName?.toLowerCase().includes(q) ||
+      r.color?.toLowerCase().includes(q)
     );
   });
 
@@ -108,30 +108,35 @@ export default function UserStockIn() {
             <table className="enterprise-table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Item Type</th>
-                  <th>SKU</th>
-                  <th>Quantity</th>
-                  <th>Colour</th>
-                  <th>Bale</th>
+                  <th>PO Date</th>
+                  <th>PO Number</th>
+                  <th>Party Name</th>
+                  <th>Item Details</th>
+                  <th>Bales</th>
                   <th>Weight (kg)</th>
-                  <th>Supplier</th>
-                  <th>Date</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((r) => (
                   <tr key={r._id}>
-                    <td className="cell-strong">{r.productId?.name || '—'}</td>
-                    <td>{r.itemType || '—'}</td>
-                    <td className="text-tertiary">{r.productId?.sku || '—'}</td>
-                    <td>{r.quantity}</td>
-                    <td>{r.color || '—'}</td>
-                    <td>{r.bale || '—'}</td>
+                    <td>{new Date(r.poDate || r.date).toLocaleDateString()}</td>
+                    <td className="cell-strong">{r.poNumber || '—'}</td>
+                    <td>{r.partyName || r.supplier || '—'}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span>{r.itemName || r.productId?.name || '—'}</span>
+                        <span className="text-tertiary" style={{ fontSize: '11px' }}>{r.yarnCount || r.itemType} {r.color && `• ${r.color}`}</span>
+                      </div>
+                    </td>
+                    <td>{r.baleCount || r.bale || '—'}</td>
                     <td>{r.weight || '—'}</td>
-                    <td>{r.supplier || '—'}</td>
-                    <td className="text-tertiary">{new Date(r.date).toLocaleDateString()}</td>
+                    <td>
+                      <span className={`badge badge-${r.status === 'Approved' ? 'success' : r.status === 'Pending' ? 'warning' : 'neutral'}`}>
+                        {r.status || 'Approved'}
+                      </span>
+                    </td>
                     <td>
                       <div className="action-buttons">
                         <button
@@ -157,7 +162,7 @@ export default function UserStockIn() {
                 ))}
                 {filtered.length === 0 && !loading && (
                   <tr>
-                    <td colSpan="10">
+                    <td colSpan="8">
                       <div className="empty-state">
                         <div className="empty-state-icon">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="24" height="24">
@@ -192,17 +197,17 @@ export default function UserStockIn() {
       <Modal open={!!viewRecord} onClose={() => setViewRecord(null)} title="Stock In Details">
         {viewRecord && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <DetailRow label="Product Name" value={viewRecord.productId?.name} />
-            <DetailRow label="SKU" value={viewRecord.productId?.sku} />
-            <DetailRow label="Item Type" value={viewRecord.itemType} />
-            <DetailRow label="Quantity" value={viewRecord.quantity} />
+            <DetailRow label="PO Number" value={viewRecord.poNumber || viewRecord.invoiceNumber} />
+            <DetailRow label="PO Date" value={new Date(viewRecord.poDate || viewRecord.date).toLocaleDateString()} />
+            <DetailRow label="Party Name" value={viewRecord.partyName || viewRecord.supplier} />
+            <DetailRow label="Item Name" value={viewRecord.itemName || viewRecord.productId?.name} />
+            <DetailRow label="Yarn Count" value={viewRecord.yarnCount || viewRecord.itemType} />
             <DetailRow label="Colour" value={viewRecord.color} />
-            <DetailRow label="Bales" value={viewRecord.bale} />
+            <DetailRow label="Number of Bales" value={viewRecord.baleCount || viewRecord.bale} />
             <DetailRow label="Weight (kg)" value={viewRecord.weight} />
-            <DetailRow label="Supplier" value={viewRecord.supplier} />
-            <DetailRow label="Invoice No" value={viewRecord.invoiceNumber} />
-            <DetailRow label="Date" value={new Date(viewRecord.date).toLocaleDateString()} />
-            <DetailRow label="Remarks" value={viewRecord.notes} />
+            <DetailRow label="Created By" value={viewRecord.createdBy?.name || 'Unknown'} />
+            <DetailRow label="Created Date & Time" value={new Date(viewRecord.createdAt || viewRecord.date).toLocaleString()} />
+            <DetailRow label="Current Status" value={viewRecord.status || 'Approved'} />
           </div>
         )}
       </Modal>

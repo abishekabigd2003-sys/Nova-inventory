@@ -1,6 +1,7 @@
 import express from 'express';
 import EditRequest from '../models/EditRequest.js';
 import Stock from '../models/Stock.js';
+import StockIn from '../models/StockIn.js';
 import Product from '../models/Product.js';
 import Notification from '../models/Notification.js';
 import AuditLog from '../models/AuditLog.js';
@@ -61,7 +62,7 @@ router.get('/pending-count', protect, authorize('Admin'), async (req, res, next)
 // @access  Private
 router.post('/', protect, async (req, res, next) => {
   try {
-    const { stockId, requestedChanges } = req.body;
+    const { stockId, stockModel, requestedChanges } = req.body;
 
     if (!stockId || !requestedChanges) {
       res.status(400);
@@ -82,6 +83,7 @@ router.post('/', protect, async (req, res, next) => {
 
     const request = await EditRequest.create({
       stockId,
+      stockModel: stockModel || 'Stock',
       userId: req.user.id,
       requestedChanges,
       status: 'Pending',
@@ -324,14 +326,29 @@ router.put('/:id/complete', protect, async (req, res, next) => {
     }
 
     // Get stock record
-    const stock = await Stock.findById(request.stockId);
+    let stock;
+    if (request.stockModel === 'StockIn') {
+      stock = await StockIn.findById(request.stockId);
+    } else {
+      stock = await Stock.findById(request.stockId);
+    }
+
     if (!stock) {
       res.status(404);
       throw new Error('Original stock record not found');
     }
 
     // Save previous values for audit
-    const previousValues = {
+    const previousValues = request.stockModel === 'StockIn' ? {
+      poNumber: stock.poNumber,
+      poDate: stock.poDate,
+      partyName: stock.partyName,
+      yarnCount: stock.yarnCount,
+      itemName: stock.itemName,
+      color: stock.color,
+      baleCount: stock.baleCount,
+      weight: stock.weight,
+    } : {
       quantity: stock.quantity,
       color: stock.color,
       bale: stock.bale,
@@ -343,19 +360,6 @@ router.put('/:id/complete', protect, async (req, res, next) => {
     // Use provided changes or fall back to requestedChanges
     const finalChanges = changes || request.requestedChanges;
 
-    // Calculate inventory diff if quantity changed
-    const newQty = finalChanges.quantity;
-    const diff = newQty !== undefined ? Number(newQty) - stock.quantity : 0;
-
-    const newWeight = finalChanges.weight;
-    const prevWeight = stock.weight ? Number(stock.weight) : 0;
-    const weightDiff = newWeight !== undefined ? Number(newWeight) - prevWeight : 0;
-
-    const newBale = finalChanges.bale;
-    const prevBale = stock.bale && !isNaN(Number(stock.bale)) ? Number(stock.bale) : 0;
-    const parsedNewBale = newBale && !isNaN(Number(newBale)) ? Number(newBale) : 0;
-    const baleDiff = newBale !== undefined ? parsedNewBale - prevBale : 0;
-
     // Apply changes (only defined fields)
     Object.keys(finalChanges).forEach((key) => {
       if (finalChanges[key] !== undefined && finalChanges[key] !== '') {
@@ -364,28 +368,42 @@ router.put('/:id/complete', protect, async (req, res, next) => {
     });
     await stock.save();
 
-    // Update product inventory if quantity changed
-    if (diff !== 0 || weightDiff !== 0 || baleDiff !== 0) {
-      const inventoryDelta = stock.type === 'IN' ? diff : -diff;
-      const weightDelta = stock.type === 'IN' ? weightDiff : -weightDiff;
-      const baleDelta = stock.type === 'IN' ? baleDiff : -baleDiff;
+    // Update product inventory if generic Stock model
+    if (request.stockModel === 'Stock') {
+      const newQty = finalChanges.quantity;
+      const diff = newQty !== undefined ? Number(newQty) - stock.quantity : 0;
 
-      // Prevent negative inventory
-      if (inventoryDelta < 0) {
-        const product = await Product.findById(stock.productId);
-        if (product && product.inventoryCount + inventoryDelta < 0) {
-          res.status(400);
-          throw new Error(`Insufficient stock for this edit. Available: ${product.inventoryCount}, Requested difference: ${-inventoryDelta}`);
+      const newWeight = finalChanges.weight;
+      const prevWeight = stock.weight ? Number(stock.weight) : 0;
+      const weightDiff = newWeight !== undefined ? Number(newWeight) - prevWeight : 0;
+
+      const newBale = finalChanges.bale;
+      const prevBale = stock.bale && !isNaN(Number(stock.bale)) ? Number(stock.bale) : 0;
+      const parsedNewBale = newBale && !isNaN(Number(newBale)) ? Number(newBale) : 0;
+      const baleDiff = newBale !== undefined ? parsedNewBale - prevBale : 0;
+
+      if (diff !== 0 || weightDiff !== 0 || baleDiff !== 0) {
+        const inventoryDelta = stock.type === 'IN' ? diff : -diff;
+        const weightDelta = stock.type === 'IN' ? weightDiff : -weightDiff;
+        const baleDelta = stock.type === 'IN' ? baleDiff : -baleDiff;
+
+        // Prevent negative inventory
+        if (inventoryDelta < 0) {
+          const product = await Product.findById(stock.productId);
+          if (product && product.inventoryCount + inventoryDelta < 0) {
+            res.status(400);
+            throw new Error(`Insufficient stock for this edit. Available: ${product.inventoryCount}, Requested difference: ${-inventoryDelta}`);
+          }
         }
-      }
 
-      await Product.findByIdAndUpdate(stock.productId, {
-        $inc: { 
-          inventoryCount: inventoryDelta,
-          totalWeight: weightDelta,
-          totalBales: baleDelta
-        },
-      });
+        await Product.findByIdAndUpdate(stock.productId, {
+          $inc: { 
+            inventoryCount: inventoryDelta,
+            totalWeight: weightDelta,
+            totalBales: baleDelta
+          },
+        });
+      }
     }
 
     // Create audit log

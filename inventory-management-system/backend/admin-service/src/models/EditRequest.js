@@ -4,9 +4,15 @@ const editRequestSchema = new mongoose.Schema(
   {
     stockId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Stock',
       required: [true, 'Stock ID is required'],
+      refPath: 'stockModel',
       index: true,
+    },
+    stockModel: {
+      type: String,
+      required: true,
+      enum: ['Stock', 'StockIn'],
+      default: 'Stock',
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,6 +27,13 @@ const editRequestSchema = new mongoose.Schema(
       weight: { type: Number },
       supplier: { type: String },
       notes: { type: String },
+      poNumber: { type: String },
+      poDate: { type: Date },
+      partyName: { type: String },
+      yarnCount: { type: String },
+      itemName: { type: String },
+      itemType: { type: String },
+      baleCount: { type: Number },
     },
     status: {
       type: String,

@@ -181,46 +181,46 @@ router.get(
         Notification.countDocuments({ isRead: false }),
         
         // --- StockIn Queries ---
-        StockIn.aggregate([
-          { $match: { status: 'Approved' } },
-          { $group: { _id: 'IN', total: { $sum: '$baleCount' } } }
+        Stock.aggregate([
+          { $match: { status: 'Approved', type: 'IN' } },
+          { $group: { _id: 'IN', total: { $sum: '$quantity' } } }
         ]),
         
-        StockIn.aggregate([
-          { $match: { status: 'Approved', poDate: { $gte: today } } },
-          { $group: { _id: 'IN', total: { $sum: '$baleCount' } } }
+        Stock.aggregate([
+          { $match: { status: 'Approved', type: 'IN', date: { $gte: today } } },
+          { $group: { _id: 'IN', total: { $sum: '$quantity' } } }
         ]),
         
-        StockIn.aggregate([
-          { $match: { status: 'Approved' } },
+        Stock.aggregate([
+          { $match: { status: 'Approved', type: 'IN' } },
           {
             $group: {
               _id: { 
-                year: { $year: '$poDate' }, 
-                month: { $month: '$poDate' }, 
+                year: { $year: '$date' }, 
+                month: { $month: '$date' }, 
                 type: 'IN' 
               },
-              total: { $sum: '$baleCount' }
+              total: { $sum: '$quantity' }
             }
           }
         ]),
         
-        StockIn.aggregate([
-          { $match: { status: 'Approved', color: { $ne: null, $ne: '' } } },
-          { $group: { _id: '$color', totalIn: { $sum: '$baleCount' } } }
+        Stock.aggregate([
+          { $match: { status: 'Approved', type: 'IN', color: { $ne: null, $ne: '' } } },
+          { $group: { _id: '$color', totalIn: { $sum: '$quantity' } } }
         ]),
         
-        StockIn.aggregate([
-          { $match: { status: 'Approved', baleCount: { $ne: null } } },
-          { $group: { _id: '$baleCount', totalIn: { $sum: '$baleCount' } } }
+        Stock.aggregate([
+          { $match: { status: 'Approved', type: 'IN', bale: { $ne: null, $ne: '' } } },
+          { $group: { _id: '$bale', totalIn: { $sum: '$quantity' } } }
         ]),
         
-        StockIn.aggregate([
-          { $match: { status: 'Approved', weight: { $ne: null } } },
-          { $group: { _id: '$weight', totalIn: { $sum: '$baleCount' } } }
+        Stock.aggregate([
+          { $match: { status: 'Approved', type: 'IN', weight: { $ne: null } } },
+          { $group: { _id: '$weight', totalIn: { $sum: '$quantity' } } }
         ]),
         
-        StockIn.find({ status: 'Approved' })
+        Stock.find({ status: 'Approved', type: 'IN' })
           .sort({ createdAt: -1 })
           .limit(5)
           .populate('createdBy', 'name')

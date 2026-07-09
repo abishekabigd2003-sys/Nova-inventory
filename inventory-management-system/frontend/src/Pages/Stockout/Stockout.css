@@ -380,73 +380,7 @@
 }
 
 /* ── Modal Overlay ────────────────────────────────────────── */
-.so-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(3px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  animation: fadeIn 0.15s ease;
-}
-
-.so-modal {
-  width: 100%;
-  border-radius: var(--radius-xl, 14px) !important;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: scaleIn 0.18s var(--ease-out, ease);
-}
-
-.so-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px 14px;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.so-modal-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.so-close-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: transparent;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: all var(--dur-fast);
-}
-
-.so-close-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.so-modal-body {
-  padding: 20px 22px;
-}
-
-.so-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-subtle);
-  margin-top: 4px;
-}
+/* Modals are now handled by global .modal-overlay, .modal-panel, etc in index.css */
 
 /* ── View Detail Grid ─────────────────────────────────────── */
 .so-detail-grid {

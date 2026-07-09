@@ -45,6 +45,21 @@ async function seed() {
       await adminUser.save();
       console.log('Admin user seeded successfully!');
     }
+    const userEmail = 'user@inventory.com';
+    const existingUser = await User.findOne({ email: userEmail });
+    if (existingUser) {
+      console.log('Regular user already exists!');
+    } else {
+      const regularUser = new User({
+        name: 'Test User',
+        email: userEmail,
+        password: 'User@123!',
+        role: 'User',
+      });
+      await regularUser.save();
+      console.log('Regular user seeded successfully!');
+    }
+
     process.exit(0);
   } catch (error) {
     console.error('Error seeding DB:', error);

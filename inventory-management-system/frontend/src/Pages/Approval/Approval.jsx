@@ -38,7 +38,7 @@ export default function Approval() {
   };
 
   const handleAction = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setProcessing(true);
     const { type, request } = confirmModal;
 
@@ -196,46 +196,48 @@ export default function Approval() {
                 {confirmModal.type === 'approve' ? 'Approve Request' : 'Reject Request'}
               </h2>
               <button className="modal-close-btn" onClick={() => setConfirmModal(null)} disabled={processing}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
-            <form className="standard-form" style={{ padding: 24 }} onSubmit={handleAction}>
+            <div className="modal-body">
               {confirmModal.type === 'approve' ? (
-                <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>
-                  Are you sure you want to approve this edit request? <br/><br/>
-                  An OTP will be generated and emailed to <strong>{confirmModal.request.userId?.email}</strong>. 
-                  The user will have 5 minutes to verify the OTP and apply the changes.
-                </p>
-              ) : (
-                <>
-                  <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16 }}>
-                    Please provide a reason for rejecting this edit request.
-                  </p>
-                  <div className="form-group">
-                    <label>Rejection Reason (Optional)</label>
-                    <textarea 
-                      rows="3" 
-                      placeholder="Explain why this request is denied..."
-                      value={rejectReason}
-                      onChange={e => setRejectReason(e.target.value)}
-                    />
+                <div style={{ color: 'var(--text-secondary)' }}>
+                  <p style={{ marginBottom: 16 }}>Are you sure you want to approve this request? This will permanently update the inventory stock levels and apply the requested changes.</p>
+                  <div style={{ padding: 12, background: 'var(--bg-hover)', borderRadius: 8, fontSize: 13 }}>
+                    An OTP will be generated and emailed to <strong>{confirmModal.request.userId?.email}</strong>. 
+                    The user must enter this OTP to complete the change.
                   </div>
-                </>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>Please provide a reason for rejecting this request.</p>
+                  <textarea 
+                    placeholder="E.g., Incorrect pricing, insufficient proof..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    style={{
+                      width: '100%', minHeight: 80, padding: 12,
+                      borderRadius: 8, border: '1px solid var(--border-color)',
+                      background: 'var(--bg-color)', color: 'var(--text-primary)',
+                      fontFamily: 'inherit', resize: 'vertical'
+                    }}
+                  />
+                </div>
               )}
-
-              <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={() => setConfirmModal(null)} disabled={processing}>
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className={`btn ${confirmModal.type === 'approve' ? 'btn-success' : 'btn-danger'}`} 
-                  disabled={processing}
-                >
-                  {processing ? 'Processing...' : confirmModal.type === 'approve' ? 'Yes, Approve' : 'Yes, Reject'}
-                </button>
-              </div>
-            </form>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setConfirmModal(null)} disabled={processing}>
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                className={`btn ${confirmModal.type === 'approve' ? 'btn-success' : 'btn-danger'}`} 
+                onClick={handleAction}
+                disabled={processing || (confirmModal.type === 'reject' && !rejectReason.trim())}
+              >
+                {processing ? 'Processing...' : confirmModal.type === 'approve' ? 'Yes, Approve' : 'Yes, Reject'}
+              </button>
+            </div>
           </div>
         </div>
       )}

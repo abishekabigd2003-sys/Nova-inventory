@@ -24,17 +24,17 @@ const fmtDate = (d) => {
 const Modal = ({ open, onClose, title, children, width = 560 }) => {
   if (!open) return null;
   return (
-    <div className="so-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose}>
       <div
-        className="so-modal card fade-in"
+        className="modal-panel"
         style={{ maxWidth: width, width: '100%' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="so-modal-header">
-          <h2 className="so-modal-title">{title}</h2>
-          <button className="so-close-btn" onClick={onClose}><X size={20} /></button>
+        <div className="modal-header">
+          <h2 className="modal-title">{title}</h2>
+          <button className="modal-close-btn" onClick={onClose}><X size={20} /></button>
         </div>
-        <div className="so-modal-body">{children}</div>
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   );
@@ -60,7 +60,7 @@ const ConfirmDialog = ({ open, onClose, onConfirm, title, message, loading }) =>
         <AlertTriangle size={28} />
       </div>
       <p className="so-confirm-msg">{message}</p>
-      <div className="so-modal-actions">
+      <div className="modal-footer">
         <button className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
         <button className="btn btn-danger" onClick={onConfirm} disabled={loading}>
           {loading ? 'Deleting…' : 'Yes, Delete'}
@@ -565,7 +565,7 @@ const Stockout = () => {
             {viewRecord.notes && <DetailRow label="Remarks" value={viewRecord.notes} />}
           </div>
         )}
-        <div className="so-modal-actions" style={{ marginTop: 24 }}>
+        <div className="modal-footer" style={{ marginTop: 24 }}>
           <button className="btn btn-secondary" onClick={() => setViewRecord(null)}>Close</button>
           <button className="btn btn-primary" onClick={() => {
             setEditRecord({ ...viewRecord, date: viewRecord.date?.split('T')[0] || '' });
@@ -653,7 +653,7 @@ const Stockout = () => {
                 onChange={e => setEditRecord({ ...editRecord, notes: e.target.value })}
               />
             </div>
-            <div className="so-modal-actions">
+            <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setEditRecord(null)}>Cancel</button>
               <button type="submit" className="btn btn-primary" disabled={actionLoading}>
                 {actionLoading ? 'Saving…' : 'Save Changes'}
@@ -804,7 +804,7 @@ const Stockout = () => {
                     onChange={e => setCreateForm({ ...createForm, notes: e.target.value })}
                   />
                 </div>
-                <div className="so-modal-actions">
+                <div className="modal-footer">
                   <button
                     type="button" className="btn btn-secondary"
                     onClick={() => setSelectedInv(null)}

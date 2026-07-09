@@ -7,13 +7,13 @@ import { useToast } from '../../hooks/useToast';
 const Modal = ({ open, onClose, title, children, width = 560 }) => {
   if (!open) return null;
   return (
-    <div className="overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={onClose}>
-      <div className="card fade-in" style={{ background: 'var(--bg-card)', maxWidth: width, width: '100%', borderRadius: '12px', overflow: 'hidden' }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-canvas)' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{title}</h2>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }} onClick={onClose}><X size={20} /></button>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-panel" style={{ maxWidth: width }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">{title}</h2>
+          <button className="modal-close-btn" onClick={onClose}><X size={20} /></button>
         </div>
-        <div style={{ padding: '24px' }}>{children}</div>
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   );

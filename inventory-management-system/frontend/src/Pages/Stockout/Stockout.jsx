@@ -6,7 +6,7 @@ import {
   FileSpreadsheet, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { exportToExcel } from '../../utils/excelExport';
-import { validateEntityName, validatePositiveNumber } from '../../utils/validation';
+import { validateEntityName, validatePositiveNumber, validateOptionalPositiveNumber } from '../../utils/validation';
 import './Stockout.css';
 
 /* ─────────────────────────────────────────────
@@ -232,12 +232,12 @@ const Stockout = () => {
     }
     
     if (createForm.weight) {
-      const weightError = validatePositiveNumber(createForm.weight, 'Weight');
+      const weightError = validateOptionalPositiveNumber(createForm.weight, 'Weight');
       if (weightError) { showToast(weightError, 'error'); return; }
     }
     
     if (createForm.bale) {
-      const baleError = validatePositiveNumber(createForm.bale, 'Number of Bales');
+      const baleError = validateOptionalPositiveNumber(createForm.bale, 'Number of Bales');
       if (baleError) { showToast(baleError, 'error'); return; }
     }
 
@@ -279,12 +279,12 @@ const Stockout = () => {
     }
     
     if (editRecord.weight) {
-      const weightError = validatePositiveNumber(editRecord.weight, 'Weight');
+      const weightError = validateOptionalPositiveNumber(editRecord.weight, 'Weight');
       if (weightError) { showToast(weightError, 'error'); return; }
     }
     
     if (editRecord.bale) {
-      const baleError = validatePositiveNumber(editRecord.bale, 'Number of Bales');
+      const baleError = validateOptionalPositiveNumber(editRecord.bale, 'Number of Bales');
       if (baleError) { showToast(baleError, 'error'); return; }
     }
 

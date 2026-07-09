@@ -55,6 +55,14 @@ export const validatePositiveNumber = (num, fieldName = 'Value') => {
   return '';
 };
 
+// Numeric: Valid positive numbers (Optional)
+export const validateOptionalPositiveNumber = (num, fieldName = 'Value') => {
+  if (num === undefined || num === null || num === '') return ''; // Allow empty
+  const parsed = Number(num);
+  if (isNaN(parsed) || parsed < 0) return `${fieldName} must be a positive number.`;
+  return '';
+};
+
 // Numeric: Strictly greater than zero
 export const validateGreaterThanZero = (num, fieldName = 'Value') => {
   if (num === undefined || num === null || num === '') return `${fieldName} is required.`;

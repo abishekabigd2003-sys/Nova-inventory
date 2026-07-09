@@ -128,7 +128,7 @@ const Stockin = () => {
   };
 
   return (
-    <div className="stockin-container fade-in">
+    <div className="page-container stockin-container fade-in">
       
       {/* Header */}
       <div className="page-header">

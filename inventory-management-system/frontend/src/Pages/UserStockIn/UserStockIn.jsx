@@ -8,6 +8,21 @@ import { Eye, X } from 'lucide-react';
 import './UserStockIn.css';
 
 const Modal = ({ open, onClose, title, children, width = 560 }) => {
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (open) {
+      window.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
     <div className="modal-overlay" onClick={onClose}>

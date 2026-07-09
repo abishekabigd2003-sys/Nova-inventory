@@ -151,16 +151,23 @@ export default function UserRequests() {
           </div>
         </div>
       ) : (
-        <FinalEditForm
-          request={editTarget}
-          onCancel={() => setEditTarget(null)}
-          onSuccess={() => {
-            showToast('Stock record updated successfully!', 'success');
-            setEditTarget(null);
-            fetchRequests(); // reload table
-          }}
-          showToast={showToast}
-        />
+        <div className="card form-card" style={{ maxWidth: 800, margin: '0 auto' }}>
+          <div className="card-header">
+            <h3 className="card-title">Finalize Changes</h3>
+          </div>
+          <div className="card-body">
+            <FinalEditForm
+              request={editTarget}
+              onCancel={() => setEditTarget(null)}
+              onSuccess={() => {
+                showToast('Stock record updated successfully!', 'success');
+                setEditTarget(null);
+                fetchRequests(); // reload table
+              }}
+              showToast={showToast}
+            />
+          </div>
+        </div>
       )}
 
       {otpRequestId && (

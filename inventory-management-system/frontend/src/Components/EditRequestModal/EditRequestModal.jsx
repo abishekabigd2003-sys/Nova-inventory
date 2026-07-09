@@ -32,33 +32,52 @@ export default function EditRequestModal({ stock, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
 
+  // Handle ESC key to close
+  React.useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [onClose]);
+
+  // Compute if form changed
+  const getRequestedChanges = () => {
+    const requestedChanges = {};
+    if (isStockIn) {
+      if (form.poNumber !== (stock.poNumber || '')) requestedChanges.poNumber = form.poNumber;
+      if (form.poDate !== (stock.poDate ? stock.poDate.split('T')[0] : '')) requestedChanges.poDate = form.poDate;
+      if (form.partyName !== (stock.partyName || '')) requestedChanges.partyName = form.partyName;
+      if (form.yarnCount !== (stock.yarnCount || '')) requestedChanges.yarnCount = form.yarnCount;
+      if (form.itemName !== (stock.itemName || '')) requestedChanges.itemName = form.itemName;
+      if (form.color !== (stock.color || '')) requestedChanges.color = form.color;
+      if (form.baleCount !== '' && Number(form.baleCount) !== (stock.baleCount || 0)) requestedChanges.baleCount = Number(form.baleCount);
+      if (form.weight !== '' && Number(form.weight) !== (stock.weight || 0)) requestedChanges.weight = Number(form.weight);
+    } else {
+      if (form.color !== (stock.color || '')) requestedChanges.color = form.color;
+      if (form.bale !== (stock.bale || '')) requestedChanges.bale = form.bale;
+      if (form.supplier !== (stock.supplier || '')) requestedChanges.supplier = form.supplier;
+      if (form.notes !== (stock.notes || '')) requestedChanges.notes = form.notes;
+      if (form.itemType !== (stock.itemType || '')) requestedChanges.itemType = form.itemType;
+      if (form.weight !== '' && Number(form.weight) !== (stock.weight || 0)) requestedChanges.weight = Number(form.weight);
+      if (form.quantity !== '' && Number(form.quantity) !== stock.quantity) requestedChanges.quantity = Number(form.quantity);
+    }
+    return requestedChanges;
+  };
+
+  const requestedChanges = getRequestedChanges();
+  const isFormChanged = Object.keys(requestedChanges).length > 0;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Only include changed fields
-    const requestedChanges = {};
-    if (isStockIn) {
-      if (form.poNumber  !== (stock.poNumber  || '')) requestedChanges.poNumber  = form.poNumber;
-      if (form.poDate    !== (stock.poDate ? stock.poDate.split('T')[0] : '')) requestedChanges.poDate = form.poDate;
-      if (form.partyName !== (stock.partyName || '')) requestedChanges.partyName = form.partyName;
-      if (form.yarnCount !== (stock.yarnCount || '')) requestedChanges.yarnCount = form.yarnCount;
-      if (form.itemName  !== (stock.itemName  || '')) requestedChanges.itemName  = form.itemName;
-      if (form.color     !== (stock.color     || '')) requestedChanges.color     = form.color;
-      if (Number(form.baleCount) !== (stock.baleCount || 0)) requestedChanges.baleCount = Number(form.baleCount);
-      if (Number(form.weight)    !== (stock.weight    || 0)) requestedChanges.weight    = Number(form.weight);
-    } else {
-      if (form.color    !== (stock.color    || '')) requestedChanges.color    = form.color;
-      if (form.bale     !== (stock.bale     || '')) requestedChanges.bale     = form.bale;
-      if (form.supplier !== (stock.supplier || '')) requestedChanges.supplier = form.supplier;
-      if (form.notes    !== (stock.notes    || '')) requestedChanges.notes    = form.notes;
-      if (form.itemType !== (stock.itemType || '')) requestedChanges.itemType = form.itemType;
-      if (Number(form.weight)   !== (stock.weight   || 0)) requestedChanges.weight   = Number(form.weight);
-      if (Number(form.quantity) !== stock.quantity)        requestedChanges.quantity = Number(form.quantity);
-    }
-
-    if (Object.keys(requestedChanges).length === 0) {
+    if (!isFormChanged) {
       setError('No changes detected. Please modify at least one field.');
       setLoading(false);
       return;
@@ -94,57 +113,58 @@ export default function EditRequestModal({ stock, onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Original values banner */}
-        <div className="erm-original-banner">
-          <p className="erm-banner-label">📋 Current Record Values</p>
-          <div className="erm-original-grid">
+        <div className="modal-body">
+          {/* Original values banner */}
+          <div className="erm-original-banner">
+            <p className="erm-banner-label">📋 Current Record Values</p>
+            <div className="erm-original-grid">
+              {isStockIn ? (
+                <>
+                  <div><span>PO Number</span><strong>{stock.poNumber || '—'}</strong></div>
+                  <div><span>Party Name</span><strong>{stock.partyName || '—'}</strong></div>
+                  <div><span>Item Name</span><strong>{stock.itemName || '—'}</strong></div>
+                  <div><span>Yarn Count</span><strong>{stock.yarnCount || '—'}</strong></div>
+                  <div><span>Bales</span><strong>{stock.baleCount || '—'}</strong></div>
+                  <div><span>Weight (kg)</span><strong>{stock.weight || '—'}</strong></div>
+                </>
+              ) : (
+                <>
+                  <div><span>Item Type</span><strong>{stock.itemType || '—'}</strong></div>
+                  <div><span>Colour</span><strong>{stock.color || '—'}</strong></div>
+                  <div><span>Bale</span><strong>{stock.bale || '—'}</strong></div>
+                  <div><span>Weight (kg)</span><strong>{stock.weight || '—'}</strong></div>
+                  <div><span>Supplier</span><strong>{stock.supplier || '—'}</strong></div>
+                  <div><span>Quantity</span><strong>{stock.quantity}</strong></div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <form className="standard-form" onSubmit={handleSubmit}>
+            <p className="erm-instruction">Modify the fields you want to request changes for. Only changed fields will be sent.</p>
+
+            {error && <div className="alert-error">{error}</div>}
+
             {isStockIn ? (
               <>
-                <div><span>PO Number</span><strong>{stock.poNumber || '—'}</strong></div>
-                <div><span>Party Name</span><strong>{stock.partyName || '—'}</strong></div>
-                <div><span>Item Name</span><strong>{stock.itemName || '—'}</strong></div>
-                <div><span>Yarn Count</span><strong>{stock.yarnCount || '—'}</strong></div>
-                <div><span>Bales</span><strong>{stock.baleCount || '—'}</strong></div>
-                <div><span>Weight (kg)</span><strong>{stock.weight || '—'}</strong></div>
-              </>
-            ) : (
-              <>
-                <div><span>Item Type</span><strong>{stock.itemType || '—'}</strong></div>
-                <div><span>Colour</span><strong>{stock.color || '—'}</strong></div>
-                <div><span>Bale</span><strong>{stock.bale || '—'}</strong></div>
-                <div><span>Weight (kg)</span><strong>{stock.weight || '—'}</strong></div>
-                <div><span>Supplier</span><strong>{stock.supplier || '—'}</strong></div>
-                <div><span>Quantity</span><strong>{stock.quantity}</strong></div>
-              </>
-            )}
-          </div>
-        </div>
-
-        <form className="standard-form" onSubmit={handleSubmit}>
-          <p className="erm-instruction">Modify the fields you want to request changes for. Only changed fields will be sent.</p>
-
-          {error && <div className="alert-error">{error}</div>}
-
-          {isStockIn ? (
-            <>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>PO Number</label>
-                  <input type="text" value={form.poNumber} onChange={(e) => setForm({ ...form, poNumber: e.target.value })} />
-                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>PO Number</label>
+                    <input type="text" required value={form.poNumber} onChange={(e) => setForm({ ...form, poNumber: e.target.value })} />
+                  </div>
                 <div className="form-group">
                   <label>PO Date</label>
-                  <input type="date" value={form.poDate} onChange={(e) => setForm({ ...form, poDate: e.target.value })} />
+                  <input type="date" required value={form.poDate} onChange={(e) => setForm({ ...form, poDate: e.target.value })} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
                   <label>Party Name</label>
-                  <input type="text" value={form.partyName} onChange={(e) => setForm({ ...form, partyName: e.target.value })} />
+                  <input type="text" required value={form.partyName} onChange={(e) => setForm({ ...form, partyName: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Item Name</label>
-                  <input type="text" value={form.itemName} onChange={(e) => setForm({ ...form, itemName: e.target.value })} />
+                  <input type="text" required value={form.itemName} onChange={(e) => setForm({ ...form, itemName: e.target.value })} />
                 </div>
               </div>
               <div className="form-row">
@@ -212,15 +232,16 @@ export default function EditRequestModal({ stock, onClose, onSuccess }) {
             </>
           )}
 
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Submitting...' : '📤 Submit Request'}
-            </button>
-          </div>
-        </form>
+            <div className="form-actions">
+              <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={loading || !isFormChanged}>
+                {loading ? 'Submitting...' : '📤 Submit Request'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

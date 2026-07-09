@@ -49,11 +49,8 @@ export default function FinalEditForm({ request, onCancel, onSuccess, showToast 
   };
 
   return (
-    <div className="card form-card">
-      <div className="card-header">
-        <h3 className="card-title">Finalize Changes</h3>
-      </div>
-      <form className="standard-form card-body" onSubmit={handleSubmit}>
+    <div className="final-edit-form-wrapper">
+      <form className="standard-form" onSubmit={handleSubmit}>
         <p className="text-secondary" style={{ fontSize: 13, marginBottom: 16 }}>
           Your OTP was verified! You may now finalize the approved changes below.
         </p>
@@ -63,21 +60,21 @@ export default function FinalEditForm({ request, onCancel, onSuccess, showToast 
             <div className="form-row">
               <div className="form-group">
                 <label>PO Number</label>
-                <input type="text" value={form.poNumber} onChange={(e) => setForm({ ...form, poNumber: e.target.value })} />
+                <input type="text" required value={form.poNumber} onChange={(e) => setForm({ ...form, poNumber: e.target.value })} />
               </div>
               <div className="form-group">
                 <label>PO Date</label>
-                <input type="date" value={form.poDate} onChange={(e) => setForm({ ...form, poDate: e.target.value })} />
+                <input type="date" required value={form.poDate} onChange={(e) => setForm({ ...form, poDate: e.target.value })} />
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Party Name</label>
-                <input type="text" value={form.partyName} onChange={(e) => setForm({ ...form, partyName: e.target.value })} />
+                <input type="text" required value={form.partyName} onChange={(e) => setForm({ ...form, partyName: e.target.value })} />
               </div>
               <div className="form-group">
                 <label>Item Name</label>
-                <input type="text" value={form.itemName} onChange={(e) => setForm({ ...form, itemName: e.target.value })} />
+                <input type="text" required value={form.itemName} onChange={(e) => setForm({ ...form, itemName: e.target.value })} />
               </div>
             </div>
             <div className="form-row">

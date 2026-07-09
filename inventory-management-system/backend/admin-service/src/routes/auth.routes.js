@@ -23,13 +23,15 @@ router.post('/register', async (req, res, next) => {
       throw new Error('Please provide name, email, and password');
     }
 
-    const userExists = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       res.status(400);
       throw new Error('User already exists with this email');
     }
 
-    const user = await User.create({ name, email, password, role: 'Staff' });
+    const user = await User.create({ name, email: normalizedEmail, password, role: 'Staff' });
 
     if (user) {
       res.status(201).json({
@@ -60,7 +62,9 @@ router.post('/login', async (req, res, next) => {
       throw new Error('Please provide email and password');
     }
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       res.status(404);
       throw new Error('Email not found');

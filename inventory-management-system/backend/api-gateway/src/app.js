@@ -85,7 +85,7 @@ for (const [route, target] of Object.entries(apiRoutes)) {
     changeOrigin: true,
     ws: route === '/socket.io',
     onError: (err, req, res) => {
-      console.error(`[api-gateway] Proxy Error on ${route}: `, err.message);
+      console.error(`[api-gateway] Proxy Error on ${route} targeting ${target}: `, err.message);
       if (res.headersSent) return;
       res.status(502).json({ message: 'Bad Gateway: Service is unavailable.' });
     }

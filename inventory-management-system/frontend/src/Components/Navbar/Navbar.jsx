@@ -83,6 +83,25 @@ export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
     return () => socket.disconnect();
   }, [user, showToast]);
 
+  const handleNotificationClick = async () => {
+    try {
+      const { data } = await api.get('/api/notifications');
+      const unread = Array.isArray(data) ? data.filter(n => !n.read) : [];
+      if (unread.length > 0) {
+        await Promise.all(unread.map(n => api.put(`/api/notifications/${n._id}/read`)));
+        setNotifCount(0);
+      }
+    } catch (error) {
+      console.error('Failed to mark notifications as read', error);
+    }
+    
+    if (user?.role === 'Admin' || user?.role === 'Manager') {
+      navigate('/admin/dashboard/approval');
+    } else {
+      navigate('/user/dashboard/my-requests');
+    }
+  };
+
   const langRef    = useRef(null);
   const profileRef = useRef(null);
 
@@ -157,7 +176,13 @@ export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
       {/* ── Right cluster ── */}
       <div className="navbar-right">
         {/* Notifications */}
-        <button className="icon-btn tooltip" data-tooltip="Notifications" aria-label={`${notifCount} notifications`}>
+        <button 
+          className="icon-btn tooltip" 
+          data-tooltip="Notifications" 
+          aria-label={`${notifCount} notifications`}
+          style={{ cursor: 'pointer' }}
+          onClick={handleNotificationClick}
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9zM13.73 21a2 2 0 01-3.46 0" />
           </svg>

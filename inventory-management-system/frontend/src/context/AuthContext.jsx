@@ -37,9 +37,17 @@ export const AuthProvider = ({ children }) => {
       setUser(data);
       return { success: true, role: data.role };
     } catch (error) {
+      let errorMessage = 'Invalid email or password.';
+      if (!error.response) {
+        errorMessage = 'Network Error: Cannot connect to server. Please ensure backend services are running.';
+      } else if (error.response.status >= 500) {
+        errorMessage = 'Server Error: The backend service is currently unavailable or misconfigured.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
       return {
         success: false,
-        message: error.response?.data?.message || 'Invalid email or password.',
+        message: errorMessage,
       };
     }
   };
@@ -51,9 +59,17 @@ export const AuthProvider = ({ children }) => {
       setUser(data);
       return { success: true, role: data.role };
     } catch (error) {
+      let errorMessage = 'Registration failed.';
+      if (!error.response) {
+        errorMessage = 'Network Error: Cannot connect to server. Please ensure backend services are running.';
+      } else if (error.response.status >= 500) {
+        errorMessage = 'Server Error: The backend service is currently unavailable or misconfigured.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed.',
+        message: errorMessage,
       };
     }
   };

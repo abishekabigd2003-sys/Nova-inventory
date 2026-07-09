@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
@@ -45,13 +45,7 @@ app.use(morgan(isProd ? 'combined' : 'dev'));
 // ── Compression ──
 app.use(compression());
 
-// ── CORS — allow frontend + gateway ──
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-);
+// ── CORS is handled by the API Gateway ──
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));

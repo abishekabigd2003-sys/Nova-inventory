@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  Plus, Search, Edit2, Trash2, X, Check, FileDown, MoreVertical, 
-  RefreshCw, AlertCircle, PackagePlus, Hash, User, Calendar 
+  Plus, Search, Edit2, Trash2, X, Check, FileDown,
+  RefreshCw, AlertCircle, PackagePlus, Hash, User, Calendar, Eye
 } from 'lucide-react';
 import { 
   getStockInRecords, createStockInRecord, updateStockInRecord, deleteStockInRecord 
@@ -292,12 +292,16 @@ const Stockin = () => {
                             </span>
                           </td>
                           <td className="actions-cell">
-                            <div className="dropdown">
-                              <button className="btn-icon"><MoreVertical size={18} /></button>
-                              <div className="dropdown-menu">
-                                <button onClick={() => startEdit(record)}><Edit2 size={14} /> Edit</button>
-                                <button className="text-danger" onClick={() => handleDelete(record._id)}><Trash2 size={14} /> Delete</button>
-                              </div>
+                            <div className="inline-actions">
+                              <button type="button" className="action-btn view-btn" title="View Details">
+                                <Eye size={16} />
+                              </button>
+                              <button type="button" className="action-btn edit-btn" title="Edit Record" onClick={() => startEdit(record)}>
+                                <Edit2 size={16} />
+                              </button>
+                              <button type="button" className="action-btn delete-btn" title="Delete Record" onClick={() => handleDelete(record._id)}>
+                                <Trash2 size={16} />
+                              </button>
                             </div>
                           </td>
                         </>

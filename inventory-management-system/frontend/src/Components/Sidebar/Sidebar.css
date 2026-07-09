@@ -347,7 +347,7 @@
 @media (max-width: 992px) {
   .sidebar {
     transform: translateX(-100%);
-    width: var(--sidebar-w) !important;
+    width: min(var(--sidebar-w), calc(100vw - 48px)) !important;
     box-shadow: var(--shadow-lg);
   }
 

@@ -26,11 +26,12 @@
 /* ── Content area ── */
 .layout-content {
   flex: 1;
-  padding: var(--space-8) clamp(var(--space-5), 3vw, var(--space-10));
+  padding: var(--space-8) clamp(var(--space-4), 3vw, var(--space-8));
   padding-top: calc(var(--navbar-h) + var(--space-8));
   background: var(--bg-app);
   overflow-y: auto;
   overflow-x: hidden;
+  width: 100%;
 }
 
 /* Page entrance animation — applied per-route change */
@@ -64,6 +65,8 @@
 @media (max-width: 992px) {
   .layout-main {
     margin-left: 0 !important;
+    width: 100%;
+    max-width: 100vw;
   }
 
   .layout-content {
@@ -77,5 +80,13 @@
     padding-top: calc(var(--navbar-h) + var(--space-5));
     padding-left: var(--space-3);
     padding-right: var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-content {
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
   }
 }

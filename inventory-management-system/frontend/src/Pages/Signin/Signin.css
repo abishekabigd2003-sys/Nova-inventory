@@ -298,25 +298,23 @@
   .signin-image { 
     width: 100%; 
     height: auto; 
+    aspect-ratio: 16/9;
     flex-shrink: 0; 
   }
   .signin-image img {
     position: absolute;
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Prevents image cropping */
+    object-fit: cover;
+    object-position: center;
     top: 0;
     left: 0;
-  }
-  /* First image dictates container height natively */
-  .signin-image img:first-child {
-    position: relative;
-    height: auto;
   }
 
   .signin-form-panel { 
     width: 100%; 
     justify-content: flex-start; 
+    align-items: flex-start;
     flex: 1; 
   }
   .signin-form-inner { 

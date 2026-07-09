@@ -136,8 +136,12 @@ export default function Approval() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{stock.productId?.name || 'Unknown Product'}</span>
-                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Stock #{stock._id?.toString().slice(-6).toUpperCase()}</span>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                            {stock.productId?.name || stock.itemName || 'Unknown Product/Item'}
+                          </span>
+                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                            {req.stockModel === 'StockIn' ? 'Stock In' : 'Stock'} #{stock._id?.toString().slice(-6).toUpperCase()}
+                          </span>
                         </div>
                       </td>
                       <td style={{ maxWidth: 280, verticalAlign: 'middle' }}>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../../api/api';
 import { useToast } from '../../hooks/useToast';
 import OtpVerification from '../../Components/OtpVerification/OtpVerification';
+import FinalEditForm from '../../Components/FinalEditForm/FinalEditForm';
 import './UserRequests.css';
 
 export default function UserRequests() {
@@ -169,100 +170,6 @@ export default function UserRequests() {
           onSuccess={handleOtpSuccess}
         />
       )}
-    </div>
-  );
-}
-
-/**
- * FinalEditForm — displays the actual form for editing the stock record
- * after OTP has been verified successfully.
- */
-function FinalEditForm({ request, onCancel, onSuccess, showToast }) {
-  const stock = request.stockId || {};
-  const approvedChanges = request.requestedChanges || {};
-
-  const [form, setForm] = useState({
-    color:    approvedChanges.color    !== undefined ? approvedChanges.color    : (stock.color || ''),
-    bale:     approvedChanges.bale     !== undefined ? approvedChanges.bale     : (stock.bale || ''),
-    weight:   approvedChanges.weight   !== undefined ? approvedChanges.weight   : (stock.weight || ''),
-    supplier: approvedChanges.supplier !== undefined ? approvedChanges.supplier : (stock.supplier || ''),
-    quantity: approvedChanges.quantity !== undefined ? approvedChanges.quantity : (stock.quantity || ''),
-    notes:    approvedChanges.notes    !== undefined ? approvedChanges.notes    : (stock.notes || ''),
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await api.put(`/api/requests/${request._id}/complete`, { changes: form });
-      onSuccess();
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to complete edit', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="card">
-      <div className="card-header">
-        <h2 className="card-title">Finalize Stock Edit</h2>
-        <span className="badge badge-success">OTP Verified</span>
-      </div>
-      
-      <div className="erm-original-banner" style={{ border: 'none', borderRadius: 0, borderBottom: '1px solid var(--border-subtle)' }}>
-        <p className="erm-banner-label">Original Values (Reference)</p>
-        <div className="erm-original-grid">
-          <div><span>Colour</span><strong>{stock.color || '—'}</strong></div>
-          <div><span>Bale</span><strong>{stock.bale || '—'}</strong></div>
-          <div><span>Weight (kg)</span><strong>{stock.weight || '—'}</strong></div>
-          <div><span>Supplier</span><strong>{stock.supplier || '—'}</strong></div>
-          <div><span>Quantity</span><strong>{stock.quantity}</strong></div>
-        </div>
-      </div>
-
-      <form className="standard-form" style={{ padding: 24 }} onSubmit={handleSubmit}>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
-          The fields below are pre-filled with your approved requested changes. Make any final adjustments and save to update the inventory.
-        </p>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Colour</label>
-            <input type="text" value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
-          </div>
-          <div className="form-group">
-            <label>Bale</label>
-            <input type="text" value={form.bale} onChange={e => setForm({...form, bale: e.target.value})} />
-          </div>
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Weight (kg)</label>
-            <input type="number" step="0.01" value={form.weight} onChange={e => setForm({...form, weight: e.target.value})} />
-          </div>
-          <div className="form-group">
-            <label>Quantity</label>
-            <input type="number" required value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})} />
-          </div>
-        </div>
-        <div className="form-group">
-          <label>Supplier</label>
-          <input type="text" value={form.supplier} onChange={e => setForm({...form, supplier: e.target.value})} />
-        </div>
-        <div className="form-group">
-          <label>Final Notes</label>
-          <textarea rows="2" value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
-        </div>
-
-        <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Saving...' : '✅ Save Changes'}
-          </button>
-        </div>
-      </form>
     </div>
   );
 }

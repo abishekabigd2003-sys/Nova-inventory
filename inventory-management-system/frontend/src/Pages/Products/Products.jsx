@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
+import { useAuth } from '../../context/AuthContext';
 import DataTable from '../../Components/DataTable/DataTable';
 import Drawer from '../../Components/Drawer/Drawer';
 import { Edit2, Trash2 } from 'lucide-react';
@@ -11,6 +12,9 @@ import './Products.css';
 const Products = () => {
   const { products, categories, addProduct, updateProduct, deleteProduct } = useInventory();
   const { showToast, ToastContainer } = useToast();
+  const { user } = useAuth();
+  
+  const isAdmin = user?.role === 'Admin';
   
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -112,7 +116,7 @@ const Products = () => {
       accessor: 'totalBales',
       render: (row) => `${row.totalBales || 0}`
     },
-    {
+    ...(isAdmin ? [{
       header: 'Actions',
       render: (row) => (
         <div className="inline-actions">
@@ -124,7 +128,7 @@ const Products = () => {
           </button>
         </div>
       )
-    }
+    }] : [])
   ];
 
   return (
@@ -142,9 +146,11 @@ const Products = () => {
         data={products} 
         searchPlaceholder="Search products by name, SKU..."
         actions={
-          <button className="btn btn-primary" onClick={() => handleOpenDrawer()}>
-            + Add Product
-          </button>
+          isAdmin ? (
+            <button className="btn btn-primary" onClick={() => handleOpenDrawer()}>
+              + Add Product
+            </button>
+          ) : null
         }
       />
 

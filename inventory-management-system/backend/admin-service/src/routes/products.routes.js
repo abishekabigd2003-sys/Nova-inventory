@@ -46,11 +46,11 @@ router.get('/:id', protect, async (req, res, next) => {
 
 // @desc    Create product
 // @route   POST /api/products
-// @access  Admin, Manager
+// @access  Admin
 router.post(
   '/',
   protect,
-  authorize('Admin', 'Manager'),
+  authorize('Admin'),
   async (req, res, next) => {
     try {
       const product = await Product.create(req.body);
@@ -68,11 +68,11 @@ router.post(
 
 // @desc    Update product
 // @route   PUT /api/products/:id
-// @access  Admin, Manager
+// @access  Admin
 router.put(
   '/:id',
   protect,
-  authorize('Admin', 'Manager'),
+  authorize('Admin'),
   async (req, res, next) => {
     try {
       const product = await Product.findByIdAndUpdate(

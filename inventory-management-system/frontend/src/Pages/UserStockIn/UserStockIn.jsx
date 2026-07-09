@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../../api/api';
 import EditRequestModal from '../../Components/EditRequestModal/EditRequestModal';
+import OtpVerification from '../../Components/OtpVerification/OtpVerification';
+import FinalEditForm from '../../Components/FinalEditForm/FinalEditForm';
 import { useToast } from '../../hooks/useToast';
 import { Eye, X } from 'lucide-react';
 import './UserStockIn.css';
@@ -31,8 +33,14 @@ export default function UserStockIn() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search,  setSearch]  = useState('');
-  const [selectedStock, setSelectedStock] = useState(null); // stock to edit
+  
+  const [selectedStock, setSelectedStock] = useState(null); // stock to edit (EditRequestModal)
   const [viewRecord, setViewRecord] = useState(null); // stock to view
+  
+  // State for OTP workflow
+  const [otpRequestId, setOtpRequestId] = useState(null);
+  const [editTarget, setEditTarget] = useState(null); // request object for FinalEditForm
+
   const { showToast, ToastContainer } = useToast();
 
   const fetchRecords = useCallback(async () => {
@@ -60,6 +68,48 @@ export default function UserStockIn() {
       r.color?.toLowerCase().includes(q)
     );
   });
+
+  const handleEditClick = async (stockRecord) => {
+    try {
+      // Fetch user's active requests to see if one already exists for this record
+      const { data: activeRequests } = await api.get('/api/requests/mine');
+      const existing = activeRequests.find(req => 
+        req.stockId?._id === stockRecord._id && 
+        ['Pending', 'Approved'].includes(req.status)
+      );
+
+      if (existing) {
+        if (existing.status === 'Approved') {
+          // Instead of redirecting, just open the OTP dialog here
+          setOtpRequestId(existing._id);
+        } else {
+          showToast('You already have a pending edit request for this record.', 'warning');
+        }
+      } else {
+        // Open form to create a new request
+        setSelectedStock(stockRecord);
+      }
+    } catch (err) {
+      showToast('Error checking active requests.', 'error');
+      // Fallback: just open the request modal
+      setSelectedStock(stockRecord);
+    }
+  };
+
+  const handleOtpSuccess = async () => {
+    showToast('OTP Verified! You can now apply your changes.', 'success');
+    // Fetch the request to pass to FinalEditForm
+    try {
+      const { data: requests } = await api.get('/api/requests/mine');
+      const request = requests.find(r => r._id === otpRequestId);
+      if (request) {
+        setEditTarget(request);
+      }
+    } catch (err) {
+      showToast('Error loading edit form.', 'error');
+    }
+    setOtpRequestId(null);
+  };
 
   return (
     <div className="page-container">
@@ -148,7 +198,7 @@ export default function UserStockIn() {
                         </button>
                         <button
                           className="btn-icon"
-                          onClick={() => setSelectedStock(r)}
+                          onClick={() => handleEditClick(r)}
                           title="Request Edit"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
@@ -192,6 +242,29 @@ export default function UserStockIn() {
             setSelectedStock(null);
           }}
         />
+      )}
+
+      {otpRequestId && (
+        <OtpVerification
+          requestId={otpRequestId}
+          onClose={() => setOtpRequestId(null)}
+          onSuccess={handleOtpSuccess}
+        />
+      )}
+
+      {editTarget && (
+        <Modal open={true} onClose={() => setEditTarget(null)} title="Finalize Approved Changes" width={600}>
+          <FinalEditForm
+            request={editTarget}
+            onCancel={() => setEditTarget(null)}
+            onSuccess={() => {
+              showToast('Stock record updated successfully!', 'success');
+              setEditTarget(null);
+              fetchRecords();
+            }}
+            showToast={showToast}
+          />
+        </Modal>
       )}
 
       <Modal open={!!viewRecord} onClose={() => setViewRecord(null)} title="Stock In Details">

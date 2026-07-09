@@ -30,8 +30,8 @@ const DataTable = ({ columns, data, searchPlaceholder = "Search...", actions }) 
   return (
     <div className="table-card">
       <div className="table-toolbar">
-        <div className="search-box">
-          <Search size={16} className="search-icon" />
+        <div className="table-search">
+          <Search />
           <input 
             type="text" 
             placeholder={searchPlaceholder} 

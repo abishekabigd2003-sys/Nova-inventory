@@ -208,7 +208,7 @@ const Stockin = () => {
               <span className="badge badge-neutral">{records.length} Records</span>
             </div>
             <div className="table-actions">
-              <div className="search-box">
+              <div className="table-search">
                 <Search size={16} />
                 <input 
                   type="text" 

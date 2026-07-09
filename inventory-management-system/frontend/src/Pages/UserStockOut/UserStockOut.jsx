@@ -82,16 +82,15 @@ export default function UserStockOut() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
-          <div className="search-bar" style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-input)', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-default)', flex: 1, maxWidth: '400px' }}>
-            <Search size={18} style={{ color: 'var(--text-tertiary)', marginRight: '8px' }} />
+      <div className="card">
+        <div className="table-toolbar">
+          <div className="table-search">
+            <Search />
             <input 
               type="text" 
               placeholder="Search by product, item, customer..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', color: 'var(--text-primary)' }}
             />
           </div>
         </div>

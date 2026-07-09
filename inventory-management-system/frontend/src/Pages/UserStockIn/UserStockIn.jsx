@@ -84,7 +84,7 @@ export default function UserStockIn() {
 
       <div className="card">
         <div className="table-toolbar">
-          <div className="search-box">
+          <div className="table-search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
             </svg>
@@ -133,16 +133,16 @@ export default function UserStockIn() {
                     <td>{r.supplier || '—'}</td>
                     <td className="text-tertiary">{new Date(r.date).toLocaleDateString()}</td>
                     <td>
-                      <div className="inline-actions">
+                      <div className="action-buttons">
                         <button
-                          className="action-btn view-btn"
+                          className="btn-icon"
                           onClick={() => setViewRecord(r)}
                           title="View Details"
                         >
                           <Eye size={16} />
                         </button>
                         <button
-                          className="action-btn edit-btn"
+                          className="btn-icon"
                           onClick={() => setSelectedStock(r)}
                           title="Request Edit"
                         >

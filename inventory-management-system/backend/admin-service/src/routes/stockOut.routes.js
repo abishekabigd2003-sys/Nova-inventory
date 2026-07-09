@@ -27,7 +27,8 @@ router.get('/', protect, async (req, res, next) => {
 
     const stock = await Stock.find(query)
       .populate('productId', 'name sku')
-      .populate('createdBy', 'name')
+      .populate('createdBy', 'name email role')
+      .populate('auditHistory.performedBy', 'name email role')
       .sort({ createdAt: -1 });
 
     res.json(stock);
@@ -43,7 +44,8 @@ router.get('/:id', protect, async (req, res, next) => {
   try {
     const stock = await Stock.findOne({ _id: req.params.id, type: 'OUT' })
       .populate('productId', 'name sku price')
-      .populate('createdBy', 'name email');
+      .populate('createdBy', 'name email role')
+      .populate('auditHistory.performedBy', 'name email role');
 
     if (!stock) {
       res.status(404);
@@ -110,6 +112,11 @@ router.post('/', protect, authorize('Admin'), async (req, res, next) => {
       notes,
       createdBy: req.user.id,
       status: 'Approved',
+      auditHistory: [{
+        action: 'CREATE',
+        performedBy: req.user.id,
+        role: req.user.role,
+      }]
     });
 
     if (validProductId) {
@@ -128,7 +135,8 @@ router.post('/', protect, authorize('Admin'), async (req, res, next) => {
 
     const populated = await Stock.findById(stock._id)
       .populate('productId', 'name sku')
-      .populate('createdBy', 'name');
+      .populate('createdBy', 'name email role')
+      .populate('auditHistory.performedBy', 'name email role');
 
     res.status(201).json(populated);
   } catch (error) {
@@ -206,11 +214,19 @@ router.put('/:id', protect, authorize('Admin'), async (req, res, next) => {
     if (date !== undefined) stock.date = date;
     if (notes !== undefined) stock.notes = notes;
 
+    stock.updatedBy = req.user.id;
+    stock.auditHistory.push({
+      action: 'UPDATE',
+      performedBy: req.user.id,
+      role: req.user.role,
+    });
+
     const updatedStock = await stock.save();
 
     const populated = await Stock.findById(updatedStock._id)
       .populate('productId', 'name sku')
-      .populate('createdBy', 'name');
+      .populate('createdBy', 'name email role')
+      .populate('auditHistory.performedBy', 'name email role');
 
     res.json(populated);
   } catch (error) {

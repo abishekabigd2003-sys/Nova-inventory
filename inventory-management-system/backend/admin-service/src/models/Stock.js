@@ -55,6 +55,35 @@ const stockSchema = new mongoose.Schema(
       ref: 'User',
       index: true,
     },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    auditHistory: [
+      {
+        action: {
+          type: String,
+          enum: ['CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT'],
+          required: true,
+        },
+        performedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        role: {
+          type: String,
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+      }
+    ],
   },
   { timestamps: true }
 );

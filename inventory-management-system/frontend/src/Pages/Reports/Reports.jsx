@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/api';
 import { exportToExcel } from '../../utils/excelExport';
@@ -23,9 +23,12 @@ export default function Reports() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
+  const [expandedRow, setExpandedRow] = useState(null); // ID of the row to show audit history
+  
   useEffect(() => {
     if (tab && tab !== activeTab) {
       setActiveTab(tab);
+      setExpandedRow(null);
     }
   }, [tab, activeTab]);
   
@@ -37,6 +40,7 @@ export default function Reports() {
   const fetchReport = useCallback(async (type) => {
     setLoading(true);
     setError('');
+    setExpandedRow(null);
     try {
       let url = `/api/reports?type=${type}`;
       if (startDate) url += `&startDate=${startDate}`;
@@ -84,14 +88,52 @@ export default function Reports() {
       item.productId?.sku?.toLowerCase().includes(term) ||
       item.color?.toLowerCase().includes(term) ||
       item.customerName?.toLowerCase().includes(term) ||
-      item.destination?.toLowerCase().includes(term)
+      item.destination?.toLowerCase().includes(term) ||
+      item.invoiceNumber?.toLowerCase().includes(term)
     );
   });
 
-
-
   const handlePrint = async () => {
     await exportToExcel(filteredData, activeTab);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  };
+
+  const renderAuditHistory = (item) => {
+    if (!item.auditHistory || item.auditHistory.length === 0) {
+      return <p style={{ color: 'var(--text-tertiary)' }}>No audit history available for this record.</p>;
+    }
+    
+    return (
+      <div className="audit-timeline">
+        {item.auditHistory.map((audit, idx) => (
+          <div key={idx} className="audit-item">
+            <div className={`audit-icon ${audit.action.toLowerCase()}`}>
+              {audit.action.charAt(0)}
+            </div>
+            <div className="audit-content">
+              <div className="audit-header">
+                <div>
+                  <span className="audit-user">{audit.performedBy?.name || 'Unknown'}</span>
+                  <span className="audit-role">({audit.role || audit.performedBy?.role || 'User'})</span>
+                </div>
+                <span className="audit-time">{formatDate(audit.timestamp)}</span>
+              </div>
+              <div className="audit-action">
+                Performed <strong>{audit.action}</strong> action on this record.
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const renderTable = () => {
@@ -129,6 +171,7 @@ export default function Reports() {
         <table className="enterprise-table" id="report-table">
           <thead>
             <tr>
+              <th>S.No</th>
               <th>Product Name</th>
               <th>SKU</th>
               <th>Category</th>
@@ -138,8 +181,9 @@ export default function Reports() {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((p) => (
+            {filteredData.map((p, index) => (
               <tr key={p._id}>
+                <td className="text-tertiary">{index + 1}</td>
                 <td><strong>{p.name}</strong></td>
                 <td className="text-tertiary">{p.sku}</td>
                 <td>{p.categoryId?.name || '—'}</td>
@@ -158,7 +202,7 @@ export default function Reports() {
               </tr>
             ))}
             {filteredData.length === 0 && (
-              <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>No products found.</td></tr>
+              <tr><td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>No products found.</td></tr>
             )}
           </tbody>
         </table>
@@ -171,35 +215,58 @@ export default function Reports() {
         <table className="enterprise-table" id="report-table">
           <thead>
             <tr>
+              <th>S.No</th>
               <th>PO Date</th>
               <th>PO Number</th>
               <th>Party Name</th>
-              <th>Item Details</th>
-              <th>Color</th>
+              <th>Item Name</th>
+              <th>Colour</th>
               <th>Bales</th>
-              <th>Weight (kg)</th>
-              <th>Status</th>
+              <th>Weight (KG)</th>
+              <th>Logged By</th>
+              <th>Timestamp</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((s) => (
-              <tr key={s._id}>
-                <td className="text-tertiary">{new Date(s.poDate).toLocaleDateString()}</td>
-                <td><strong>{s.poNumber || '—'}</strong></td>
-                <td>{s.partyName || '—'}</td>
-                <td>{s.itemName} {s.yarnCount ? `(${s.yarnCount})` : ''}</td>
-                <td>{s.color || '—'}</td>
-                <td>{s.baleCount || '—'}</td>
-                <td>{s.weight || '—'}</td>
-                <td>
-                  <span className={`badge ${s.status === 'Approved' ? 'badge-success' : 'badge-neutral'}`}>
-                    {s.status}
-                  </span>
-                </td>
-              </tr>
+            {filteredData.map((s, index) => (
+              <Fragment key={s._id}>
+                <tr>
+                  <td className="text-tertiary">{index + 1}</td>
+                  <td>{new Date(s.poDate).toLocaleDateString('en-GB')}</td>
+                  <td><strong>{s.poNumber || '—'}</strong></td>
+                  <td>{s.partyName || '—'}</td>
+                  <td>{s.itemName} <span className="text-tertiary">{s.yarnCount ? `(${s.yarnCount})` : ''}</span></td>
+                  <td>{s.color || '—'}</td>
+                  <td><span className="cell-bale">{s.baleCount || '—'}</span></td>
+                  <td><span className="cell-weight">{s.weight || '—'}</span></td>
+                  <td>
+                    <div className="badge-logged-by">
+                      <div className={`role-dot ${s.createdBy?.role === 'Admin' ? 'admin' : 'user'}`} />
+                      {s.createdBy?.name || s.createdBy?.email || 'System'}
+                    </div>
+                  </td>
+                  <td className="text-tertiary">{formatDate(s.createdAt)}</td>
+                  <td>
+                    <button 
+                      className="btn-ghost" 
+                      onClick={() => setExpandedRow(expandedRow === s._id ? null : s._id)}
+                    >
+                      {expandedRow === s._id ? 'Close History' : 'View History'}
+                    </button>
+                  </td>
+                </tr>
+                {expandedRow === s._id && (
+                  <tr className="audit-row">
+                    <td colSpan="11">
+                      {renderAuditHistory(s)}
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
             {filteredData.length === 0 && (
-              <tr><td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>No records found.</td></tr>
+              <tr><td colSpan="11" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>No records found.</td></tr>
             )}
           </tbody>
         </table>
@@ -211,33 +278,58 @@ export default function Reports() {
       <table className="enterprise-table" id="report-table">
         <thead>
           <tr>
-            <th>Product</th>
-            <th>Item Type</th>
-            <th>SKU</th>
-            <th>Qty</th>
-            <th>Color</th>
-            <th>Bale</th>
-            <th>Weight (kg)</th>
-            <th>Customer/Destination</th>
-            <th>Date</th>
+            <th>S.No</th>
+            <th>Invoice Date</th>
+            <th>Invoice Number</th>
+            <th>Customer Name</th>
+            <th>Product Name</th>
+            <th>Colour</th>
+            <th>Bales</th>
+            <th>Weight (KG)</th>
+            <th>Logged By</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((s) => (
-            <tr key={s._id}>
-              <td><strong>{s.productId?.name || '—'}</strong></td>
-              <td>{s.itemType || '—'}</td>
-              <td className="text-tertiary">{s.productId?.sku || '—'}</td>
-              <td>{s.quantity}</td>
-              <td>{s.color || '—'}</td>
-              <td>{s.bale || '—'}</td>
-              <td>{s.weight || '—'}</td>
-              <td>{s.customerName || s.destination || '—'}</td>
-              <td className="text-tertiary">{new Date(s.date).toLocaleDateString()}</td>
-            </tr>
+          {filteredData.map((s, index) => (
+            <Fragment key={s._id}>
+              <tr>
+                <td className="text-tertiary">{index + 1}</td>
+                <td>{new Date(s.date).toLocaleDateString('en-GB')}</td>
+                <td><strong>{s.invoiceNumber || '—'}</strong></td>
+                <td>{s.customerName || s.destination || '—'}</td>
+                <td>{s.productId?.name || '—'} <span className="text-tertiary">({s.quantity} units)</span></td>
+                <td>{s.color || '—'}</td>
+                <td><span className="cell-bale">{s.bale || '—'}</span></td>
+                <td><span className="cell-weight">{s.weight || '—'}</span></td>
+                <td>
+                  <div className="badge-logged-by">
+                    <div className={`role-dot ${s.createdBy?.role === 'Admin' ? 'admin' : 'user'}`} />
+                    {s.createdBy?.name || s.createdBy?.email || 'System'}
+                  </div>
+                </td>
+                <td className="text-tertiary">{formatDate(s.createdAt)}</td>
+                <td>
+                  <button 
+                    className="btn-ghost" 
+                    onClick={() => setExpandedRow(expandedRow === s._id ? null : s._id)}
+                  >
+                    {expandedRow === s._id ? 'Close History' : 'View History'}
+                  </button>
+                </td>
+              </tr>
+              {expandedRow === s._id && (
+                <tr className="audit-row">
+                  <td colSpan="11">
+                    {renderAuditHistory(s)}
+                  </td>
+                </tr>
+              )}
+            </Fragment>
           ))}
           {filteredData.length === 0 && (
-            <tr><td colSpan="9" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>No records found.</td></tr>
+            <tr><td colSpan="11" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-tertiary)' }}>No records found.</td></tr>
           )}
         </tbody>
       </table>
@@ -251,7 +343,7 @@ export default function Reports() {
     <div className="page-container">
       <div className="page-header flex-between">
         <div className="page-header-left">
-          <h1 className="page-title">Reports</h1>
+          <h1 className="page-title">Enterprise Reports</h1>
           <p className="page-subtitle">Inventory analytics — Stock In, Stock Out, Item-wise, Colour-wise, Bale-wise, Weight-wise</p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -299,7 +391,7 @@ export default function Reports() {
         <div style={{ padding: '16px', display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
           <input 
             type="text" 
-            placeholder="Search by product, SKU, color..." 
+            placeholder="Search by PO Number, Party, SKU, Item Name..." 
             style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-default)', flex: 1, minWidth: '200px' }}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

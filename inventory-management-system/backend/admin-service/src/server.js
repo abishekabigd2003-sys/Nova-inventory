@@ -7,7 +7,7 @@ import { seedAdmin } from './utils/seedAdmin.js';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.ADMIN_PORT || 5001; // Avoid collision with Render's PORT
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {

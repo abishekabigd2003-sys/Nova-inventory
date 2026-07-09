@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   Plus, Search, Edit2, Trash2, X, Check, FileDown,
   RefreshCw, AlertCircle, PackagePlus, Hash, User, Calendar, Eye
@@ -34,7 +34,7 @@ const Stockin = () => {
   const [editFormData, setEditFormData] = useState(null);
 
   // Fetch Data
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getStockInRecords({ search });
@@ -44,11 +44,11 @@ const Stockin = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search]);
 
   useEffect(() => {
     fetchData();
-  }, [search]);
+  }, [fetchData]);
 
   const showSuccess = (msg) => {
     setSuccess(msg);

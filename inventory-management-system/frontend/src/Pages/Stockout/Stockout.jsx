@@ -6,7 +6,7 @@ import {
   FileSpreadsheet, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { exportToExcel } from '../../utils/excelExport';
-import { validateEntityName, validatePositiveNumber, validateOptionalPositiveNumber } from '../../utils/validation';
+import { validateEntityName, validateOptionalPositiveNumber } from '../../utils/validation';
 import './Stockout.css';
 
 /* ─────────────────────────────────────────────

@@ -44,7 +44,7 @@ export default function Dashboard() {
       const res = await api.get('/api/dashboard');
       setData(res.data);
       setError(null);
-    } catch (_err) {
+    } catch {
       setError('Failed to load dashboard data. Please try again.');
       showToast('Error loading dashboard data', 'error');
     } finally {

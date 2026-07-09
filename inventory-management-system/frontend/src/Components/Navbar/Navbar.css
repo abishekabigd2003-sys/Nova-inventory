@@ -12,8 +12,10 @@
   align-items: center;
   gap: var(--space-5);
   padding: 0 var(--space-6);
-  z-index: var(--z-navbar);
+  z-index: var(--z-navbar, 100);
+  background: var(--bg-app);
   border-bottom: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
   transition: left var(--dur-slow) var(--ease-out);
 }
 

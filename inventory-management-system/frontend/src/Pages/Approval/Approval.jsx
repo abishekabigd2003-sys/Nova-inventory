@@ -140,15 +140,15 @@ export default function Approval() {
                           <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Stock #{stock._id?.toString().slice(-6).toUpperCase()}</span>
                         </div>
                       </td>
-                      <td className="change-cell" style={{ maxWidth: 280 }}>
+                      <td style={{ maxWidth: 280, verticalAlign: 'middle' }}>
                         {req.requestedChanges && Object.keys(req.requestedChanges).length > 0 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div className="change-cell">
                             {Object.entries(req.requestedChanges).map(([k, v]) => (
-                              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-                                <span style={{ width: 60, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{k}:</span>
-                                <span style={{ color: 'var(--text-tertiary)', textDecoration: 'line-through' }}>{stock[k] || '—'}</span>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="12" height="12" style={{ color: 'var(--text-tertiary)' }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{v}</span>
+                              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, flexWrap: 'wrap', lineHeight: 1.4 }}>
+                                <span style={{ minWidth: 60, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'capitalize', flexShrink: 0 }}>{k}:</span>
+                                <span style={{ color: 'var(--text-tertiary)', textDecoration: 'line-through', wordBreak: 'break-word' }}>{stock[k] || '—'}</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                <span style={{ color: 'var(--color-primary)', fontWeight: 600, wordBreak: 'break-word', flex: 1 }}>{v}</span>
                               </div>
                             ))}
                           </div>

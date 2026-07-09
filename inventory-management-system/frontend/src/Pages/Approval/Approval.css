@@ -22,10 +22,13 @@
 .change-cell {
   font-family: var(--font-mono);
   font-size: 12.5px;
-  padding: 4px 8px;
-  background: var(--bg-hover);
-  border-radius: var(--radius-sm);
-  display: inline-block;
+  padding: 10px 12px;
+  background: var(--surface-100);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .approval-actions {

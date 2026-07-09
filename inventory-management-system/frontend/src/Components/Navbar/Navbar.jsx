@@ -120,7 +120,7 @@ export default function Navbar({ theme, onThemeToggle, onMenuClick }) {
   };
 
   return (
-    <header className="navbar glass" role="banner">
+    <header className="navbar" role="banner">
       {/* ── Left ── */}
       <div className="navbar-left">
         <button

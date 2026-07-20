@@ -7,7 +7,7 @@ if (-not $env:MONGO_URI) {
 $env:JWT_SECRET = "supersecrettestkey"
 $env:ADMIN_SERVICE_URL = "http://127.0.0.1:5001"
 $env:API_GATEWAY_URL = "http://127.0.0.1:5000"
-$env:FRONTEND_URL = "http://127.0.0.1:5173"
+$env:FRONTEND_URL = "http://127.0.0.1:5000"
 
 Write-Host "Starting Admin Service..."
 Start-Process node -ArgumentList "backend/admin-service/src/server.js" -NoNewWindow -RedirectStandardOutput admin.log -RedirectStandardError admin.err
@@ -19,10 +19,7 @@ Start-Process node -ArgumentList "backend/api-gateway/src/server.js" -NoNewWindo
 npx wait-on -i 1000 -t 30000 http://127.0.0.1:5000/health
 Write-Host "API Gateway Started"
 
-Write-Host "Starting Frontend..."
-Start-Process npm.cmd -ArgumentList "run dev --prefix frontend -- --host 127.0.0.1" -NoNewWindow -RedirectStandardOutput frontend.log -RedirectStandardError frontend.err
-npx wait-on -i 1000 -t 30000 http-get://127.0.0.1:5173
-Write-Host "Frontend Started"
+Write-Host "Frontend is served by API Gateway on port 5000"
 
 Write-Host "Running QA Tests..."
 Set-Location qa-tests

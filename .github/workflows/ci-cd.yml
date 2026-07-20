@@ -144,6 +144,7 @@ jobs:
         working-directory: ./inventory-management-system/qa-tests
         env:
           MONGO_URI: mongodb://127.0.0.1:27017/ims_test_db
+          FRONTEND_URL: http://127.0.0.1:5173
         run: |
           npm run seed
           npm test

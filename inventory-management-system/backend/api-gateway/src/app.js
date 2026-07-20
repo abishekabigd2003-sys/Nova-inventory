@@ -50,7 +50,7 @@ app.use(cors({
 // ── Admin Service URL ──
 const ADMIN_URL = isProd 
   ? process.env.ADMIN_SERVICE_URL 
-  : (process.env.ADMIN_SERVICE_URL || 'http://localhost:5001');
+  : (process.env.ADMIN_SERVICE_URL || 'http://127.0.0.1:5001');
 
 if (isProd && !ADMIN_URL) {
   console.error('FATAL: ADMIN_SERVICE_URL is not defined in environment variables');
